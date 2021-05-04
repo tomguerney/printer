@@ -28,3 +28,4 @@ func (p *Printer) Error(text string, a ...interface{}) {
 	textln := fmt.Sprintf("Error: %s\n", text)
 	fmt.Fprintf(p.out, textln, a...)
 }
+
