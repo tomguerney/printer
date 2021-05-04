@@ -60,6 +60,22 @@ func (suite *PrinterSuite) TestErrorWithArgument() {
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
+func (suite *PrinterSuite) TestTabulate() {
+	table := [][]string{
+		{"The", "first", "row"},
+		{"This", "is", "another", "row"},
+		{"The", "tertiary", "row"},
+	}
+	expected := []string{
+		"The     first       row",
+		"This    is          another    row",
+		"The     tertiary    row",
+	}
+	actual, err := suite.Printer.Tabulate(table)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
 func TestPrinterSuite(t *testing.T) {
 	suite.Run(t, new(PrinterSuite))
 }

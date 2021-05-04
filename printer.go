@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
+	"text/tabwriter"
 )
 
 // Printer is a tool for formatting output
@@ -29,3 +31,18 @@ func (p *Printer) Error(text string, a ...interface{}) {
 	fmt.Fprintf(p.out, textln, a...)
 }
 
+// Tabulate prints a formmatted table
+func (p *Printer) Tabulate(rows [][]string) ([]string, error) {
+
+	builder := strings.Builder{}
+	writer := tabwriter.NewWriter(&builder, 0, 8, 4, ' ', 0)
+
+	for _, row := range rows {
+		fmt.Fprintln(writer, fmt.Sprintf("%s", strings.Join(row, "\t")))
+	}
+
+	writer.Flush()
+	table := strings.Split(builder.String(), "\n")
+
+	return table[:len(table)-1], nil
+}
