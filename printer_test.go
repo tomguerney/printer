@@ -142,9 +142,9 @@ func (suite *PrinterSuite) TestTabulate() {
 		{"The", "tertiary", "row"},
 	}
 	expected := []string{
-		"The     first       row",
-		"This    is          another    row",
-		"The     tertiary    row",
+		"row1",
+		"row2",
+		"row3",
 	}
 	suite.Formatter.On("Tabulate", table).Return(expected)
 	suite.Printer.Tabulate(table)
@@ -160,9 +160,9 @@ func (suite *PrinterSuite) TestSTabulate() {
 		{"The", "tertiary", "row"},
 	}
 	expected := []string{
-		"The     first       row",
-		"This    is          another    row",
-		"The     tertiary    row",
+		"row1",
+		"row2",
+		"row3",
 	}
 	suite.Formatter.On("Tabulate", table).Return(expected)
 	actual := suite.Printer.STabulate(table)
