@@ -1,4 +1,4 @@
-package templater
+package stenciller
 
 import (
 	"fmt"
@@ -7,14 +7,30 @@ import (
 	"reflect"
 )
 
-type Templater struct {
-	templates []Template
+// Stenciller takes structs and formats their field values to predefined templates and colors
+type Stenciller struct {
+	stencils []stencil
 }
 
-type Template struct {
-	Id       string
+type stencil struct {
+	ID       string
 	Template string
 	Colors   map[string]string
+}
+
+// New returns a pointer to a new Stenciller struct
+func New() *Stenciller {
+	return &Stenciller{}
+}
+
+// AddStencil adds a new stencil
+func (t *Stenciller) AddStencil(id, template string, colors map[string]string) {
+	t.stencils = append(t.stencils, stencil{id, template, colors})
+}
+
+// UseStencil applies an interface to the stencil with the passed ID
+func (t *Stenciller) UseStencil(id string, s interface{}) (string, error) {
+	return "nil", nil
 }
 
 func modifyInterface(ifce interface{}) {
