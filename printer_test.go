@@ -1,7 +1,6 @@
 package printer
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -14,7 +13,8 @@ type MockWriter struct {
 }
 
 func (m *MockWriter) Write(p []byte) (n int, err error) {
-	return 0, nil
+	args := m.Called(string(p))
+	return args.Int(0), args.Error(1)
 }
 
 // MockFormatter is a mock formatter for testing
@@ -59,66 +59,46 @@ type PrinterSuite struct {
 	Stenciller *MockStenciller
 }
 
-func newMockWriter() *MockWriter {
-	writer := new(MockWriter)
-	// writer.On("Write", mock.Anything).Return(0, nil)
-	return writer
-}
-
-func newMockFormatter() *MockFormatter {
-	formatter := new(MockFormatter)
-	// formatter.On("Msg", mock.Anything, mock.Anything).Return("formatted string")
-	// formatter.On("Error", mock.Anything).Return(0, nil)
-	// formatter.On("Tabulate", mock.Anything).Return(0, nil)
-	return formatter
-}
-
-func newMockStenciller() *MockStenciller {
-	stenciller := new(MockStenciller)
-	// stenciller.On("AddStencil", mock.Anything)
-	// stenciller.On("UseStencil", mock.Anything).Return(0, nil)
-	return stenciller
-}
-
 func (suite *PrinterSuite) SetupTest() {
-	suite.Writer = newMockWriter()
-	suite.Formatter = newMockFormatter()
-	suite.Stenciller = newMockStenciller()
+	suite.Writer = new(MockWriter)
+	suite.Writer.On("Write", mock.Anything).Return(0, nil)
+	suite.Formatter = new(MockFormatter)
+	suite.Stenciller = new(MockStenciller)
 	suite.Printer = &Printer{suite.Writer, suite.Formatter, suite.Stenciller}
 }
 
 func (suite *PrinterSuite) TestMessage() {
 	msg := "test message"
-	// expected := fmt.Sprintf("%v\n", msg)
-	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return("formatted string")
+	formatted := "formatted string"
+	suite.Formatter.On("Msg", msg, mock.Anything).Return(formatted)
 	suite.Printer.Msg(msg)
-	// suite.Formatter.AssertExpectations(suite.T())
-	suite.Writer.AssertCalled(suite.T(), "Write")
+	suite.Writer.AssertCalled(suite.T(), "Write", formatted)
 }
 
 func (suite *PrinterSuite) TestMessageWithArgument() {
-	msg := "test message %v"
-	arg := "arg"
-	// expected := fmt.Sprintf("%v\n", fmt.Sprintf(msg, arg))
-	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return("formatted string")
-	suite.Printer.Msg(msg, arg)
-	// suite.Formatter
-	// suite.Writer.AssertCalled(suite.T(), "Write", expected)
+	msg := "test message"
+	args := "test args"
+	formatted := "formatted string"
+	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return(formatted)
+	suite.Printer.Msg(msg, args)
+	suite.Writer.AssertCalled(suite.T(), "Write", formatted)
 }
 
 func (suite *PrinterSuite) TestError() {
 	errMsg := "test error message"
-	expected := fmt.Sprintf("Error: %v\n", errMsg)
+	formatted := "formatted error string"
+	suite.Formatter.On("Error", errMsg, mock.Anything).Return(formatted)
 	suite.Printer.Error(errMsg)
-	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+	suite.Writer.AssertCalled(suite.T(), "Write", formatted)
 }
 
 func (suite *PrinterSuite) TestErrorWithArgument() {
 	errMsg := "test message %v"
-	arg := "arg"
-	expected := fmt.Sprintf("Error: %v\n", fmt.Sprintf(errMsg, arg))
-	suite.Printer.Error(errMsg, arg)
-	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+	args := "test arg"
+	formatted := "formatted error string"
+	suite.Formatter.On("Error", errMsg, mock.Anything).Return(formatted)
+	suite.Printer.Error(errMsg, args)
+	suite.Writer.AssertCalled(suite.T(), "Write", formatted)
 }
 
 func (suite *PrinterSuite) TestTabulate() {
@@ -132,8 +112,12 @@ func (suite *PrinterSuite) TestTabulate() {
 		"This    is          another    row",
 		"The     tertiary    row",
 	}
+	suite.Formatter.On("Tabulate", table).Return(expected)
 	suite.Printer.Tabulate(table)
-	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+	suite.Writer.AssertCalled(suite.T(), "Write", expected[0])
+	suite.Writer.AssertCalled(suite.T(), "Write", expected[1])
+	suite.Writer.AssertCalled(suite.T(), "Write", expected[2])
+	suite.Writer.AssertNumberOfCalls(suite.T(), "Write", 3)
 }
 
 func TestPrinterSuite(t *testing.T) {
