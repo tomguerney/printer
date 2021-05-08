@@ -69,36 +69,70 @@ func (suite *PrinterSuite) SetupTest() {
 
 func (suite *PrinterSuite) TestMessage() {
 	msg := "test message"
-	formatted := "formatted string"
-	suite.Formatter.On("Msg", msg, mock.Anything).Return(formatted)
+	expected := "formatted string"
+	suite.Formatter.On("Msg", msg, mock.Anything).Return(expected)
 	suite.Printer.Msg(msg)
-	suite.Writer.AssertCalled(suite.T(), "Write", formatted)
+	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+}
+
+func (suite *PrinterSuite) TestSMessage() {
+	msg := "test message"
+	expected := "formatted string"
+	suite.Formatter.On("Msg", msg, mock.Anything).Return(expected)
+	actual := suite.Printer.SMsg(msg)
+	suite.Equal(expected, actual)
 }
 
 func (suite *PrinterSuite) TestMessageWithArgument() {
 	msg := "test message"
 	args := "test args"
-	formatted := "formatted string"
-	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return(formatted)
+	expected := "formatted string"
+	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return(expected)
 	suite.Printer.Msg(msg, args)
-	suite.Writer.AssertCalled(suite.T(), "Write", formatted)
+	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+}
+
+func (suite *PrinterSuite) TestSMessageWithArgument() {
+	msg := "test message"
+	args := "test args"
+	expected := "formatted string"
+	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return(expected)
+	actual := suite.Printer.SMsg(msg, args)
+	suite.Equal(expected, actual)
 }
 
 func (suite *PrinterSuite) TestError() {
 	errMsg := "test error message"
-	formatted := "formatted error string"
-	suite.Formatter.On("Error", errMsg, mock.Anything).Return(formatted)
+	expected := "formatted error string"
+	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
 	suite.Printer.Error(errMsg)
-	suite.Writer.AssertCalled(suite.T(), "Write", formatted)
+	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+}
+
+func (suite *PrinterSuite) TestSError() {
+	errMsg := "test error message"
+	expected := "formatted error string"
+	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
+	actual := suite.Printer.SError(errMsg)
+	suite.Equal(expected, actual)
 }
 
 func (suite *PrinterSuite) TestErrorWithArgument() {
 	errMsg := "test message %v"
 	args := "test arg"
-	formatted := "formatted error string"
-	suite.Formatter.On("Error", errMsg, mock.Anything).Return(formatted)
+	expected := "formatted error string"
+	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
 	suite.Printer.Error(errMsg, args)
-	suite.Writer.AssertCalled(suite.T(), "Write", formatted)
+	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+}
+
+func (suite *PrinterSuite) TestSErrorWithArgument() {
+	errMsg := "test message %v"
+	args := "test arg"
+	expected := "formatted error string"
+	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
+	actual := suite.Printer.SError(errMsg, args)
+	suite.Equal(expected, actual)
 }
 
 func (suite *PrinterSuite) TestTabulate() {
@@ -119,7 +153,21 @@ func (suite *PrinterSuite) TestTabulate() {
 	suite.Writer.AssertCalled(suite.T(), "Write", expected[2])
 	suite.Writer.AssertNumberOfCalls(suite.T(), "Write", 3)
 }
-
+func (suite *PrinterSuite) TestSTabulate() {
+	table := [][]string{
+		{"The", "first", "row"},
+		{"This", "is", "another", "row"},
+		{"The", "tertiary", "row"},
+	}
+	expected := []string{
+		"The     first       row",
+		"This    is          another    row",
+		"The     tertiary    row",
+	}
+	suite.Formatter.On("Tabulate", table).Return(expected)
+	actual := suite.Printer.STabulate(table)
+	suite.Equal(expected, actual)
+}
 func TestPrinterSuite(t *testing.T) {
 	suite.Run(t, new(PrinterSuite))
 }
