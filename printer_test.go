@@ -42,8 +42,9 @@ type MockStenciller struct {
 	mock.Mock
 }
 
-func (m *MockStenciller) AddStencil(id, template string, colors map[string]string) {
-	m.Called(id, template, colors)
+func (m *MockStenciller) AddStencil(id, template string, colors map[string]string) error {
+	args := m.Called(id, template, colors)
+	return args.Error(0)
 }
 
 func (m *MockStenciller) UseStencil(id string, s interface{}) (string, error) {
