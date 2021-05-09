@@ -54,16 +54,19 @@ func (s *Stenciller) colorData(stencil *stencil, data map[string]string) map[str
 	colored := make(map[string]string, len(data))
 	for key, val := range data {
 		if col, ok := stencil.Colors[key]; ok {
-			coloredVal, err := s.colorer.Color(val, col)
-			if err != nil {
-				log.Infof("Unable to set [key=%v] [value=%v] with color [%v]")
-				colored[key] = val
-			} else {
-				colored[key] = coloredVal
-			}
+			colored[key] = s.colorValue(val, col)
+
 		} else {
 			colored[key] = val
 		}
 	}
 	return colored
+}
+
+func (s *Stenciller) colorValue(val, col string) string {
+	if coloredVal, ok := s.colorer.Color(val, col); ok {
+		return coloredVal
+	}
+	log.Infof("Unable to set [value=%v] with color [%v]", val, col)
+	return val
 }

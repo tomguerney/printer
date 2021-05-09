@@ -21,9 +21,9 @@ func TestCorrectColorNames(t *testing.T) {
 	}
 	for _, tt := range colorTests {
 		t.Run(tt.color, func(t *testing.T) {
-			_, err := c.Color(text, tt.color)
-			if err != nil {
-				t.Fatalf("error returned from Colorize with color %v", tt.color)
+			_, ok := c.Color(text, tt.color)
+			if !ok {
+				t.Fatalf("Colorize failed with color %v", tt.color)
 			}
 		})
 	}
@@ -31,8 +31,8 @@ func TestCorrectColorNames(t *testing.T) {
 
 func TestIncorrectColorName(t *testing.T) {
 	c := Colorer{}
-	_, err := c.Color("not a color", "text")
-	if err == nil {
-		t.Fatal("\"not a color\" should return error")
+	_, ok := c.Color("not a color", "text")
+	if ok {
+		t.Fatal("\"not a color\" should not return ok")
 	}
 }

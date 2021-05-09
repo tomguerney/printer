@@ -1,8 +1,6 @@
 package colorer
 
 import (
-	"fmt"
-
 	"github.com/fatih/color"
 )
 
@@ -10,26 +8,26 @@ import (
 type Colorer struct{}
 
 // Color transforms the string into one of the available colors
-func (c *Colorer) Color(text string, colorName string) (string, error) {
+func (c *Colorer) Color(text string, colorName string) (string, bool) {
 	switch colorName {
 	case "black":
-		return c.Black(text), nil
+		return c.Black(text), true
 	case "red":
-		return c.Red(text), nil
+		return c.Red(text), true
 	case "green":
-		return c.Green(text), nil
+		return c.Green(text), true
 	case "yellow":
-		return c.Yellow(text), nil
+		return c.Yellow(text), true
 	case "blue":
-		return c.Blue(text), nil
+		return c.Blue(text), true
 	case "magenta":
-		return c.Magenta(text), nil
+		return c.Magenta(text), true
 	case "cyan":
-		return c.Cyan(text), nil
+		return c.Cyan(text), true
 	case "white":
-		return c.White(text), nil
+		return c.White(text), true
 	default:
-		return "", fmt.Errorf("color \"%v\" not available", text)
+		return "", false
 	}
 }
 

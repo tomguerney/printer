@@ -16,5 +16,5 @@ type Stenciller interface {
 
 // Colorer colors text
 type Colorer interface {
-	Color(text, color string) (string, error)
+	Color(text, color string) (string, bool)
 }

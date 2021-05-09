@@ -17,9 +17,9 @@ type MockColorer struct {
 	mock.Mock
 }
 
-func (m *MockColorer) Color(text, color string) (string, error) {
+func (m *MockColorer) Color(text, color string) (string, bool) {
 	args := m.Called(text, color)
-	return args.String(0), args.Error(1)
+	return args.String(0), args.Bool(1)
 }
 
 func (suite *StencillerSuite) SetupTest() {
@@ -72,17 +72,17 @@ func (suite *StencillerSuite) TestColorData() {
 		"key1": "value1",
 		"key2": "value2",
 	}
-	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", nil)
-	suite.Colorer.On("Color", "value2", "green").Return("greenValue", nil)
+	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", true)
+	suite.Colorer.On("Color", "value2", "green").Return("greenValue", true)
 	actual := suite.Stenciller.colorData(stencil, data)
 	suite.Equal(expected, actual)
 }
 
 func (suite *StencillerSuite) TestColorDataWithValueWithoutColorDefinition() {
 	expected := map[string]string{
-		"key1": "blueValue",
-		"key2": "originalValue",
-		"key3": "greenValue",
+		"key1": "blueValue1",
+		"key2": "value2",
+		"key3": "greenValue3",
 	}
 	stencil := &stencil{
 		ID: "1",
@@ -93,11 +93,35 @@ func (suite *StencillerSuite) TestColorDataWithValueWithoutColorDefinition() {
 	}
 	data := map[string]string{
 		"key1": "value1",
-		"key2": "originalValue",
+		"key2": "value2",
 		"key3": "value3",
 	}
-	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", nil)
-	suite.Colorer.On("Color", "value3", "green").Return("greenValue", nil)
+	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
+	suite.Colorer.On("Color", "value3", "green").Return("greenValue3", true)
+	actual := suite.Stenciller.colorData(stencil, data)
+	suite.Equal(expected, actual)
+}
+
+func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
+	expected := map[string]string{
+		"key1": "blueValue1",
+		"key2": "value2",
+		"key3": "value3",
+	}
+	stencil := &stencil{
+		ID: "1",
+		Colors: map[string]string{
+			"key1": "blue",
+			"key3": "notacolor",
+		},
+	}
+	data := map[string]string{
+		"key1": "value1",
+		"key2": "value2",
+		"key3": "value3",
+	}
+	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
+	suite.Colorer.On("Color", "value3", "notacolor").Return("", false)
 	actual := suite.Stenciller.colorData(stencil, data)
 	suite.Equal(expected, actual)
 }
