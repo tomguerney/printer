@@ -15,6 +15,7 @@ type Printer struct {
 	Out        io.Writer
 	formatter  domain.Formatter
 	stenciller domain.Stenciller
+	logger     
 }
 
 // New returns a new Printer struct

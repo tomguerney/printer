@@ -1,11 +1,11 @@
-package colorizer
+package colorer
 
 import (
 	"testing"
 )
 
 func TestCorrectColorNames(t *testing.T) {
-	c := Colorizer{}
+	c := Colorer{}
 	const text = "text"
 	var colorTests = []struct {
 		color string
@@ -21,7 +21,7 @@ func TestCorrectColorNames(t *testing.T) {
 	}
 	for _, tt := range colorTests {
 		t.Run(tt.color, func(t *testing.T) {
-			_, err := c.Colorize(tt.color, text)
+			_, err := c.Color(text, tt.color)
 			if err != nil {
 				t.Fatalf("error returned from Colorize with color %v", tt.color)
 			}
@@ -30,8 +30,8 @@ func TestCorrectColorNames(t *testing.T) {
 }
 
 func TestIncorrectColorName(t *testing.T) {
-	c := Colorizer{}
-	_, err := c.Colorize("not a color", "text")
+	c := Colorer{}
+	_, err := c.Color("not a color", "text")
 	if err == nil {
 		t.Fatal("\"not a color\" should return error")
 	}

@@ -1,4 +1,4 @@
-package colorizer
+package colorer
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"github.com/fatih/color"
 )
 
-// Colorizer encapsulates colorizing text
-type Colorizer struct{}
+// Colorer colors strings
+type Colorer struct{}
 
-// Colorize transforms the text into one of the available colors
-func (c *Colorizer) Colorize(colorName string, text string) (string, error) {
+// Color transforms the string into one of the available colors
+func (c *Colorer) Color(text string, colorName string) (string, error) {
 	switch colorName {
 	case "black":
 		return c.Black(text), nil
@@ -28,46 +28,47 @@ func (c *Colorizer) Colorize(colorName string, text string) (string, error) {
 		return c.Cyan(text), nil
 	case "white":
 		return c.White(text), nil
+	default:
+		return "", fmt.Errorf("color \"%v\" not available", text)
 	}
-	return "", fmt.Errorf("color \"%v\" not available", text)
 }
 
 // Black returns black text
-func (c *Colorizer) Black(text string) string {
+func (c *Colorer) Black(text string) string {
 	return color.BlackString(text)
 }
 
 // Red returns red text
-func (c *Colorizer) Red(text string) string {
+func (c *Colorer) Red(text string) string {
 	return color.RedString(text)
 }
 
 // Green returns green text
-func (c *Colorizer) Green(text string) string {
+func (c *Colorer) Green(text string) string {
 	return color.GreenString(text)
 }
 
 // Yellow returns yellow text
-func (c *Colorizer) Yellow(text string) string {
+func (c *Colorer) Yellow(text string) string {
 	return color.YellowString(text)
 }
 
 // Blue returns blue text
-func (c *Colorizer) Blue(text string) string {
+func (c *Colorer) Blue(text string) string {
 	return color.BlueString(text)
 }
 
 // Magenta returns magenta text
-func (c *Colorizer) Magenta(text string) string {
+func (c *Colorer) Magenta(text string) string {
 	return color.MagentaString(text)
 }
 
 // Cyan returns cyan text
-func (c *Colorizer) Cyan(text string) string {
+func (c *Colorer) Cyan(text string) string {
 	return color.CyanString(text)
 }
 
 // White returns white text
-func (c *Colorizer) White(text string) string {
+func (c *Colorer) White(text string) string {
 	return color.WhiteString(text)
 }
