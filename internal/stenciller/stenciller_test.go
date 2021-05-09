@@ -34,9 +34,23 @@ func (suite *StencillerSuite) TestAddStencil() {
 	colors := map[string]string{
 		"test": "red",
 	}
-	suite.Stenciller.AddStencil(id, template, colors)
+	err := suite.Stenciller.AddStencil(id, template, colors)
+	suite.NoError(err)
 	suite.Len(suite.Stenciller.stencils, 1)
 }
+
+func (suite *StencillerSuite) TestAddStencilWithExistingID() {
+	stencil := &stencil{ID: "test-id",
+		Template: "{{ .Test }} template",
+		Colors: map[string]string{
+			"test": "red",
+		}}
+	suite.Stenciller.stencils = append(suite.Stenciller.stencils, stencil)
+	suite.Len(suite.Stenciller.stencils, 1)
+	err := suite.Stenciller.AddStencil(stencil.ID, "{{ .Template }}", nil)
+	suite.Errorf(err, "Stencil with ID test-id already exists")
+}
+
 func (suite *StencillerSuite) TestFindStencil() {
 	stencil1 := &stencil{ID: "1"}
 	stencil2 := &stencil{ID: "2"}
@@ -125,6 +139,8 @@ func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
 	actual := suite.Stenciller.colorData(stencil, data)
 	suite.Equal(expected, actual)
 }
+
+// test interpolate
 
 func TestStencillerSuite(t *testing.T) {
 	suite.Run(t, new(StencillerSuite))

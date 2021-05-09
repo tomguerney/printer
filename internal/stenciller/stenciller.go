@@ -2,6 +2,8 @@ package stenciller
 
 import (
 	"fmt"
+	"html/template"
+	"strings"
 
 	"github.com/apex/log"
 	"github.com/tomguerney/printer/internal/domain"
@@ -26,7 +28,14 @@ func New() *Stenciller {
 
 // AddStencil adds a new stencil
 func (s *Stenciller) AddStencil(id, template string, colors map[string]string) error {
-	//TODO: validate input: id is not duplicated, colors exist, template is valid
+	if id == "" {
+		return fmt.Errorf("Stencil ID may not be empty")
+	}
+	for _, stencil := range s.stencils {
+		if stencil.ID == id {
+			return fmt.Errorf("Stencil with ID %v already exists", id)
+		}
+	}
 	s.stencils = append(s.stencils, &stencil{id, template, colors})
 	return nil
 }
@@ -38,6 +47,7 @@ func (s *Stenciller) UseStencil(id string, data map[string]string) (string, erro
 		return "", err
 	}
 	_ = s.colorData(stencil, data)
+
 	return "", nil
 }
 
@@ -55,7 +65,6 @@ func (s *Stenciller) colorData(stencil *stencil, data map[string]string) map[str
 	for key, val := range data {
 		if col, ok := stencil.Colors[key]; ok {
 			colored[key] = s.colorValue(val, col)
-
 		} else {
 			colored[key] = val
 		}
@@ -69,4 +78,18 @@ func (s *Stenciller) colorValue(val, col string) string {
 	}
 	log.Infof("Unable to set [value=%v] with color [%v]", val, col)
 	return val
+}
+
+// need to test this
+func (s *Stenciller) interpolate(tmpl string, data map[string]string) (string, error) {
+	builder := strings.Builder{}
+	parsed, err := template.New("stencil").Parse(tmpl)
+	if err != nil {
+		return "", err
+	}
+	err = parsed.Execute(&builder, data)
+	if err != nil {
+		return "", err
+	}
+	return builder.String(), nil
 }
