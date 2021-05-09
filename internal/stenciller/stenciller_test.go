@@ -1,19 +1,30 @@
 package stenciller
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
 type StencillerSuite struct {
 	suite.Suite
 	Stenciller *Stenciller
+	Colorer    *MockColorer
+}
+
+type MockColorer struct {
+	mock.Mock
+}
+
+func (m *MockColorer) Color(text, color string) (string, error) {
+	args := m.Called(text, color)
+	return args.String(0), args.Error(1)
 }
 
 func (suite *StencillerSuite) SetupTest() {
-	suite.Stenciller = &Stenciller{}
+	suite.Colorer = new(MockColorer)
+	suite.Stenciller = &Stenciller{colorer: suite.Colorer}
 }
 
 func (suite *StencillerSuite) TestAddStencil() {
@@ -26,46 +37,6 @@ func (suite *StencillerSuite) TestAddStencil() {
 	suite.Stenciller.AddStencil(id, template, colors)
 	suite.Len(suite.Stenciller.stencils, 1)
 }
-
-func (suite *StencillerSuite) TestGetValue() {
-	type TestType struct {
-		Field1 string
-		Field2 int
-		Field3 string
-	}
-	data := TestType{"one", 2, "three"}
-	orig := reflect.ValueOf(data)
-	value, _ := suite.Stenciller.copyValue(orig)
-	suite.Equal(3, value.NumField())
-}
-
-func (suite *StencillerSuite) TestGetValueAllFieldsAreStrings() {
-	type TestType struct {
-		Field1 string
-		Field2 int
-		Field3 byte
-		Field4 bool
-	}
-	data := TestType{"one", 2, byte(12), true}
-	orig := reflect.ValueOf(data)
-	value, _ := suite.Stenciller.copyValue(orig)
-	for i := 0; i < value.NumField(); i++ {
-		suite.IsType("", value.Field(i).Interface())
-	}
-}
-
-func (suite *StencillerSuite) TestGetValueIgnoresUnexportedfields() {
-	type TestType struct {
-		field1 string
-		Field2 int
-		Field3 string
-	}
-	data := TestType{"one", 2, "three"}
-	orig := reflect.ValueOf(data)
-	value, _ := suite.Stenciller.copyValue(orig)
-	suite.Equal(2, value.NumField())
-}
-
 func (suite *StencillerSuite) TestFindStencil() {
 	stencil1 := &stencil{ID: "1"}
 	stencil2 := &stencil{ID: "2"}
@@ -85,24 +56,50 @@ func (suite *StencillerSuite) TestNotFindStencil() {
 	suite.Nil(actual)
 }
 
-func (suite *StencillerSuite) TestColorFields() {
-	stencil := &stencil{ID: "1"}
-	type TestOrig struct {
-		Field1 string
-		Field2 int
-		Field3 string
+func (suite *StencillerSuite) TestColorData() {
+	expected := map[string]string{
+		"key1": "blueValue",
+		"key2": "greenValue",
 	}
-	origData := TestOrig{"one", 2, "three"}
-	orig := reflect.ValueOf(origData)
-	type TestCopy struct {
-		Field1 string
-		Field2 string
-		Field3 string
+	stencil := &stencil{
+		ID: "1",
+		Colors: map[string]string{
+			"key1": "blue",
+			"key2": "green",
+		},
 	}
-	copyData := TestCopy{}
-	copy := reflect.ValueOf(copyData)
-	suite.Stenciller.colorFields(stencil, orig, copy)
+	data := map[string]string{
+		"key1": "value1",
+		"key2": "value2",
+	}
+	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", nil)
+	suite.Colorer.On("Color", "value2", "green").Return("greenValue", nil)
+	actual := suite.Stenciller.colorData(stencil, data)
+	suite.Equal(expected, actual)
+}
 
+func (suite *StencillerSuite) TestColorDataWithValueWithoutColorDefinition() {
+	expected := map[string]string{
+		"key1": "blueValue",
+		"key2": "originalValue",
+		"key3": "greenValue",
+	}
+	stencil := &stencil{
+		ID: "1",
+		Colors: map[string]string{
+			"key1": "blue",
+			"key3": "green",
+		},
+	}
+	data := map[string]string{
+		"key1": "value1",
+		"key2": "originalValue",
+		"key3": "value3",
+	}
+	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", nil)
+	suite.Colorer.On("Color", "value3", "green").Return("greenValue", nil)
+	actual := suite.Stenciller.colorData(stencil, data)
+	suite.Equal(expected, actual)
 }
 
 func TestStencillerSuite(t *testing.T) {
