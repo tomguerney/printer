@@ -3,6 +3,7 @@ package printer
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/tomguerney/printer/internal/domain"
 	"github.com/tomguerney/printer/internal/formatter"
@@ -11,23 +12,23 @@ import (
 
 // Printer prints formatted strings to its configured io.Writer output
 type Printer struct {
-	out        io.Writer
+	Out        io.Writer
 	formatter  domain.Formatter
 	stenciller domain.Stenciller
 }
 
 // New returns a new Printer struct
-func New(out io.Writer) *Printer {
+func New() *Printer {
 	return &Printer{
-		out: out,
-		formatter: formatter.New(),
-		stenciller: stenciller.New(),
+		os.Stdout,
+		formatter.New(),
+		stenciller.New(),
 	}
 }
 
 // Msg prints a formatted message to output
 func (p *Printer) Msg(text string, a ...interface{}) {
-	fmt.Fprint(p.out, p.formatter.Msg(text, a))
+	fmt.Fprint(p.Out, p.formatter.Msg(text, a))
 }
 
 // SMsg returns a formatted message string
@@ -37,7 +38,7 @@ func (p *Printer) SMsg(text string, a ...interface{}) string {
 
 // Error prints a formatted error message to output
 func (p *Printer) Error(text string, a ...interface{}) {
-	fmt.Fprint(p.out, p.formatter.Error(text, a))
+	fmt.Fprint(p.Out, p.formatter.Error(text, a))
 }
 
 // SError returns a formatted error message string
@@ -49,7 +50,7 @@ func (p *Printer) SError(text string, a ...interface{}) string {
 func (p *Printer) Tabulate(rows [][]string) {
 	tabulated := p.formatter.Tabulate(rows)
 	for _, row := range tabulated {
-		fmt.Fprint(p.out, row)
+		fmt.Fprint(p.Out, row)
 	}
 }
 
@@ -69,7 +70,7 @@ func (p *Printer) UseStencil(id string, data map[string]string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(p.out, result)
+	fmt.Fprint(p.Out, result)
 	return nil
 }
 

@@ -6,11 +6,13 @@ import (
 	"os"
 
 	f "github.com/tomguerney/printer/internal/formatter"
+	p "github.com/tomguerney/printer/internal/printer"
 	s "github.com/tomguerney/printer/internal/stenciller"
 )
 
 var formatter = f.New()
 var stenciller = s.New()
+var printer = p.New()
 
 // Writer is the io.Writer to print to
 var Writer io.Writer = os.Stdout
