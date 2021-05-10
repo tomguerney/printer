@@ -13,6 +13,7 @@ import (
 type Stenciller struct {
 	stencils []*stencil
 	colorer  domain.Colorer
+	logger   log.Interface
 }
 
 type stencil struct {

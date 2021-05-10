@@ -1,4 +1,4 @@
-package printer
+package setter
 
 import (
 	"testing"
@@ -52,91 +52,91 @@ func (m *MockStenciller) UseStencil(id string, data map[string]string) (string, 
 	return args.String(0), args.Error(1)
 }
 
-type PrinterSuite struct {
+type SetterSuite struct {
 	suite.Suite
-	Printer    *Printer
+	Setter     *Setter
 	Writer     *MockWriter
 	Formatter  *MockFormatter
 	Stenciller *MockStenciller
 }
 
-func (suite *PrinterSuite) SetupTest() {
+func (suite *SetterSuite) SetupTest() {
 	suite.Writer = new(MockWriter)
 	suite.Writer.On("Write", mock.Anything).Return(0, nil)
 	suite.Formatter = new(MockFormatter)
 	suite.Stenciller = new(MockStenciller)
-	suite.Printer = &Printer{suite.Writer, suite.Formatter, suite.Stenciller}
+	suite.Setter = &Setter{suite.Writer, suite.Formatter, suite.Stenciller}
 }
 
-func (suite *PrinterSuite) TestMessage() {
+func (suite *SetterSuite) TestMessage() {
 	msg := "test message"
 	expected := "formatted string"
 	suite.Formatter.On("Msg", msg, mock.Anything).Return(expected)
-	suite.Printer.Msg(msg)
+	suite.Setter.Msg(msg)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
-func (suite *PrinterSuite) TestSMessage() {
+func (suite *SetterSuite) TestSMessage() {
 	msg := "test message"
 	expected := "formatted string"
 	suite.Formatter.On("Msg", msg, mock.Anything).Return(expected)
-	actual := suite.Printer.SMsg(msg)
+	actual := suite.Setter.SMsg(msg)
 	suite.Equal(expected, actual)
 }
 
-func (suite *PrinterSuite) TestMessageWithArgument() {
+func (suite *SetterSuite) TestMessageWithArgument() {
 	msg := "test message"
 	args := "test args"
 	expected := "formatted string"
 	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return(expected)
-	suite.Printer.Msg(msg, args)
+	suite.Setter.Msg(msg, args)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
-func (suite *PrinterSuite) TestSMessageWithArgument() {
+func (suite *SetterSuite) TestSMessageWithArgument() {
 	msg := "test message"
 	args := "test args"
 	expected := "formatted string"
 	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return(expected)
-	actual := suite.Printer.SMsg(msg, args)
+	actual := suite.Setter.SMsg(msg, args)
 	suite.Equal(expected, actual)
 }
 
-func (suite *PrinterSuite) TestError() {
+func (suite *SetterSuite) TestError() {
 	errMsg := "test error message"
 	expected := "formatted error string"
 	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
-	suite.Printer.Error(errMsg)
+	suite.Setter.Error(errMsg)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
-func (suite *PrinterSuite) TestSError() {
+func (suite *SetterSuite) TestSError() {
 	errMsg := "test error message"
 	expected := "formatted error string"
 	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
-	actual := suite.Printer.SError(errMsg)
+	actual := suite.Setter.SError(errMsg)
 	suite.Equal(expected, actual)
 }
 
-func (suite *PrinterSuite) TestErrorWithArgument() {
+func (suite *SetterSuite) TestErrorWithArgument() {
 	errMsg := "test message %v"
 	args := "test arg"
 	expected := "formatted error string"
 	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
-	suite.Printer.Error(errMsg, args)
+	suite.Setter.Error(errMsg, args)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
-func (suite *PrinterSuite) TestSErrorWithArgument() {
+func (suite *SetterSuite) TestSErrorWithArgument() {
 	errMsg := "test message %v"
 	args := "test arg"
 	expected := "formatted error string"
 	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
-	actual := suite.Printer.SError(errMsg, args)
+	actual := suite.Setter.SError(errMsg, args)
 	suite.Equal(expected, actual)
 }
 
-func (suite *PrinterSuite) TestTabulate() {
+func (suite *SetterSuite) TestTabulate() {
 	table := [][]string{
 		{"The", "first", "row"},
 		{"This", "is", "another", "row"},
@@ -148,13 +148,13 @@ func (suite *PrinterSuite) TestTabulate() {
 		"row3",
 	}
 	suite.Formatter.On("Tabulate", table).Return(expected)
-	suite.Printer.Tabulate(table)
+	suite.Setter.Tabulate(table)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected[0])
 	suite.Writer.AssertCalled(suite.T(), "Write", expected[1])
 	suite.Writer.AssertCalled(suite.T(), "Write", expected[2])
 	suite.Writer.AssertNumberOfCalls(suite.T(), "Write", 3)
 }
-func (suite *PrinterSuite) TestSTabulate() {
+func (suite *SetterSuite) TestSTabulate() {
 	table := [][]string{
 		{"The", "first", "row"},
 		{"This", "is", "another", "row"},
@@ -166,9 +166,9 @@ func (suite *PrinterSuite) TestSTabulate() {
 		"row3",
 	}
 	suite.Formatter.On("Tabulate", table).Return(expected)
-	actual := suite.Printer.STabulate(table)
+	actual := suite.Setter.STabulate(table)
 	suite.Equal(expected, actual)
 }
-func TestPrinterSuite(t *testing.T) {
-	suite.Run(t, new(PrinterSuite))
+func TestSetterSuite(t *testing.T) {
+	suite.Run(t, new(SetterSuite))
 }

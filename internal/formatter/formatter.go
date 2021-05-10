@@ -9,7 +9,7 @@ import (
 // Formatter formats text for output
 type Formatter struct{}
 
-// NewFormatter returns a pointer to a new Formatter struct
+// New returns a pointer to a new Formatter struct
 func New() *Formatter {
 	return &Formatter{}
 }
