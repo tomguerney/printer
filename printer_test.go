@@ -47,8 +47,8 @@ func (m *MockStenciller) AddStencil(id, template string, colors map[string]strin
 	return args.Error(0)
 }
 
-func (m *MockStenciller) UseStencil(id string, s interface{}) (string, error) {
-	args := m.Called(id, s)
+func (m *MockStenciller) UseStencil(id string, data map[string]string) (string, error) {
+	args := m.Called(id, data)
 	return args.String(0), args.Error(1)
 }
 

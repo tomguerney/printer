@@ -15,7 +15,6 @@ type Printer struct {
 	Out        io.Writer
 	formatter  domain.Formatter
 	stenciller domain.Stenciller
-	logger     
 }
 
 // New returns a new Printer struct
@@ -58,4 +57,28 @@ func (p *Printer) Tabulate(rows [][]string) {
 // STabulate takes an array of string arrays and return an array of formatted rows
 func (p *Printer) STabulate(rows [][]string) []string {
 	return p.formatter.Tabulate(rows)
+}
+
+// AddStencil adds a new stencil
+func (p *Printer) AddStencil(id, template string, colors map[string]string) error {
+	return p.stenciller.AddStencil(id, template, colors)
+}
+
+// UseStencil applies a string map to the stencil with the passed ID and prints it to output
+func (p *Printer) UseStencil(id string, data map[string]string) error {
+	result, err := p.stenciller.UseStencil(id, data)
+	if err != nil {
+		return err
+	}
+	fmt.Fprint(p.Out, result)
+	return nil
+}
+
+// FUseStencil applies a string map to the stencil with the passed ID and returns the result
+func (p *Printer) FUseStencil(id string, data map[string]string) (string, error) {
+	result, err := p.stenciller.UseStencil(id, data)
+	if err != nil {
+		return "", err
+	}
+	return result, nil
 }

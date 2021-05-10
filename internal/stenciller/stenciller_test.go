@@ -30,7 +30,7 @@ func (suite *StencillerSuite) SetupTest() {
 func (suite *StencillerSuite) TestAddStencil() {
 	suite.Empty(suite.Stenciller.stencils)
 	id := "test-id"
-	template := "{{ .Test }} template"
+	template := "{{ .test }} template"
 	colors := map[string]string{
 		"test": "red",
 	}
@@ -41,7 +41,7 @@ func (suite *StencillerSuite) TestAddStencil() {
 
 func (suite *StencillerSuite) TestAddStencilWithExistingID() {
 	stencil := &stencil{ID: "test-id",
-		Template: "{{ .Test }} template",
+		Template: "{{ .test }} template",
 		Colors: map[string]string{
 			"test": "red",
 		}}
@@ -49,6 +49,23 @@ func (suite *StencillerSuite) TestAddStencilWithExistingID() {
 	suite.Len(suite.Stenciller.stencils, 1)
 	err := suite.Stenciller.AddStencil(stencil.ID, "{{ .Template }}", nil)
 	suite.Errorf(err, "Stencil with ID test-id already exists")
+}
+
+func (suite *StencillerSuite) TestUseStencil() {
+	id := "test-id"
+	template := "{{ .test }} template"
+	colors := map[string]string{
+		"test": "red",
+	}
+	suite.Stenciller.AddStencil(id, template, colors)
+	data := map[string]string {
+		"test": "value",
+	}
+	suite.Colorer.On("Color", "value", "red").Return("redValue", true)
+	actual, err := suite.Stenciller.UseStencil(id, data)
+	suite.NoError(err)
+	expected := "redValue template"
+	suite.Equal(expected, actual)
 }
 
 func (suite *StencillerSuite) TestFindStencil() {
@@ -140,7 +157,42 @@ func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
 	suite.Equal(expected, actual)
 }
 
-// test interpolate
+func (suite *StencillerSuite) TestInterpolate() {
+	data := map[string]string{
+		"Field1": "value1",
+		"field2": "value2",
+	}
+	tmpl := "abc {{ .field2 }} def {{.Field1}}"
+	expected := "abc value2 def value1"
+	actual, err := suite.Stenciller.interpolate(tmpl, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
+func (suite *StencillerSuite) TestInterpolateWithNonExistantKey() {
+	data := map[string]string{
+		"Field1": "value1",
+		"field2": "value2",
+	}
+	tmpl := "abc {{ .field2 }} def {{.Field3}}"
+	expected := "abc value2 def "
+	actual, err := suite.Stenciller.interpolate(tmpl, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
+func (suite *StencillerSuite) TestInterpolateWithExtraMapKey() {
+	data := map[string]string{
+		"Field1": "value1",
+		"field2": "value2",
+		"Field3": "value3",
+	}
+	tmpl := "abc {{ .field2 }} def {{.Field1}}"
+	expected := "abc value2 def value1"
+	actual, err := suite.Stenciller.interpolate(tmpl, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
 
 func TestStencillerSuite(t *testing.T) {
 	suite.Run(t, new(StencillerSuite))

@@ -40,15 +40,18 @@ func (s *Stenciller) AddStencil(id, template string, colors map[string]string) e
 	return nil
 }
 
-// UseStencil applies an interface to the stencil with the passed ID
+// UseStencil applies a string map to the stencil with the passed ID
 func (s *Stenciller) UseStencil(id string, data map[string]string) (string, error) {
 	stencil, err := s.findStencil(id)
 	if err != nil {
 		return "", err
 	}
-	_ = s.colorData(stencil, data)
-
-	return "", nil
+	coloredData := s.colorData(stencil, data)
+	result, err := s.interpolate(stencil.Template, coloredData)
+	if err != nil {
+		return "", err
+	}
+	return result, nil
 }
 
 func (s *Stenciller) findStencil(id string) (*stencil, error) {
@@ -80,7 +83,6 @@ func (s *Stenciller) colorValue(val, col string) string {
 	return val
 }
 
-// need to test this
 func (s *Stenciller) interpolate(tmpl string, data map[string]string) (string, error) {
 	builder := strings.Builder{}
 	parsed, err := template.New("stencil").Parse(tmpl)
