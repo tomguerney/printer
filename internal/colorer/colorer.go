@@ -7,6 +7,11 @@ import (
 // Colorer colors strings
 type Colorer struct{}
 
+// New returns a pointer to a new Colorer struct
+func New() *Colorer {
+	return &Colorer{}
+}
+
 // Color transforms the string into one of the available colors
 func (c *Colorer) Color(text string, colorName string) (string, bool) {
 	switch colorName {

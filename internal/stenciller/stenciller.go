@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/apex/log"
+	"github.com/tomguerney/printer/internal/colorer"
 	"github.com/tomguerney/printer/internal/domain"
 )
 
@@ -24,7 +25,9 @@ type stencil struct {
 
 // New returns a pointer to a new Stenciller struct
 func New() *Stenciller {
-	return &Stenciller{}
+	return &Stenciller{
+		colorer: colorer.New(),
+	}
 }
 
 // AddStencil adds a new stencil

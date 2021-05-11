@@ -12,8 +12,8 @@ var setter = s.New()
 // Writer is the io.Writer to print to
 var Writer io.Writer = os.Stdout
 
-// SetOut sets the writer of the setter
-func SetOut(writer io.Writer) {
+// SetWriter sets the writer of the setter
+func SetWriter(writer io.Writer) {
 	setter.Writer = writer
 }
 
