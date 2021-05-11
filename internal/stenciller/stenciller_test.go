@@ -64,7 +64,7 @@ func (suite *StencillerSuite) TestUseStencil() {
 	suite.Colorer.On("Color", "value", "red").Return("redValue", true)
 	actual, err := suite.Stenciller.UseStencil(id, data)
 	suite.NoError(err)
-	expected := "redValue template"
+	expected := "redValue template\n"
 	suite.Equal(expected, actual)
 }
 

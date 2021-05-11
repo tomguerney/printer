@@ -55,7 +55,7 @@ func (s *Stenciller) UseStencil(id string, data map[string]string) (string, erro
 	if err != nil {
 		return "", err
 	}
-	return result, nil
+	return fmt.Sprintf("%v\n", result), nil
 }
 
 func (s *Stenciller) findStencil(id string) (*stencil, error) {

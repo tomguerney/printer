@@ -143,7 +143,7 @@ func (suite *PrinterSuite) TestUseStencil() {
 	data := map[string]string{
 		"test": "value",
 	}
-	expected := "value template"
+	expected := "value template\n"
 	err := UseStencil(id, data)
 	suite.NoError(err)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
