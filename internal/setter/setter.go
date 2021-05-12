@@ -74,8 +74,8 @@ func (s *Setter) AddTmplStencil(id, template string, colors map[string]string) e
 }
 
 // AddTableStencil adds a new table stencil
-func (s *Setter) AddTableStencil(id string, colors map[string]string) error {
-	return s.stenciller.AddTableStencil(id, colors)
+func (s *Setter) AddTableStencil(id string, headers []string, colors map[string]string) error {
+	return s.stenciller.AddTableStencil(id, headers, colors)
 }
 
 // Stencil applies a string map to the stencil with the passed ID and prints it to output

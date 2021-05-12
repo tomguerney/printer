@@ -13,19 +13,21 @@ import (
 
 // Stenciller takes structs and formats their field values to predefined templates and colors
 type Stenciller struct {
-	stencils []*stencil
-	colorer  domain.Colorer
+	tmplStencils  []*tmplStencil
+	tableStencils []*tableStencil
+	colorer       domain.Colorer
 }
 
-type stencil struct {
+type tmplStencil struct {
 	ID       string
 	Template string
 	Colors   map[string]string
 }
 
 type tableStencil struct {
-	ID     string
-	Colors map[string]string
+	ID      string
+	Headers []string
+	Colors  map[string]string
 }
 
 // New returns a pointer to a new Stenciller struct
@@ -40,36 +42,36 @@ func (s *Stenciller) AddTmplStencil(id, template string, colors map[string]strin
 	if id == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
-	for _, stencil := range s.stencils {
+	for _, stencil := range s.tmplStencils {
 		if stencil.ID == id {
 			return fmt.Errorf("Stencil with ID %v already exists", id)
 		}
 	}
-	s.stencils = append(s.stencils, &stencil{id, template, colors})
+	s.tmplStencils = append(s.tmplStencils, &tmplStencil{id, template, colors})
 	return nil
 }
 
 // AddTableStencil adds a new stencil for a table
-func (s *Stenciller) AddTableStencil(id string, colors map[string]string) error {
+func (s *Stenciller) AddTableStencil(id string, headers []string, colors map[string]string) error {
 	if id == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
-	for _, stencil := range s.stencils {
+	for _, stencil := range s.tableStencils {
 		if stencil.ID == id {
 			return fmt.Errorf("Stencil with ID %v already exists", id)
 		}
 	}
-	s.stencils = append(s.stencils, &stencil{ID: id, Template: "", Colors: colors})
+	s.tableStencils = append(s.tableStencils, &tableStencil{ID: id, Headers: headers, Colors: colors})
 	return nil
 }
 
 // TmplStencil applies a string map to the stencil with the passed ID
 func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, error) {
-	stencil, err := s.findStencil(id)
+	stencil, err := s.findTmplStencil(id)
 	if err != nil {
 		return "", err
 	}
-	coloredData := s.colorData(stencil, data)
+	coloredData := s.colorData(stencil.Colors, data)
 	if stencil.Template == "" {
 		log.Info().Msgf("Template with ID %v is an empty string", id)
 	}
@@ -82,13 +84,13 @@ func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, err
 
 // TableStencil applies a slice of string maps to the stencil with the passed ID
 func (s *Stenciller) TableStencil(id string, dataRows []map[string]string) ([][]string, error) {
-	stencil, err := s.findStencil(id)
+	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err
 	}
 	coloredRows := [][]string{}
 	for _, row := range dataRows {
-		coloredData := s.colorData(stencil, row)
+		coloredData := s.colorData(stencil.Colors, row)
 		coloredRow := make([]string, len(coloredData))
 		for _, value := range coloredData {
 			coloredRow = append(coloredRow, value)
@@ -98,19 +100,28 @@ func (s *Stenciller) TableStencil(id string, dataRows []map[string]string) ([][]
 	return coloredRows, nil
 }
 
-func (s *Stenciller) findStencil(id string) (*stencil, error) {
-	for _, stencil := range s.stencils {
+func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
+	for _, stencil := range s.tmplStencils {
 		if stencil.ID == id {
 			return stencil, nil
 		}
 	}
-	return nil, fmt.Errorf("Unable to find stencil with id of %v", id)
+	return nil, fmt.Errorf("Unable to find template stencil with id of %v", id)
 }
 
-func (s *Stenciller) colorData(stencil *stencil, data map[string]string) map[string]string {
+func (s *Stenciller) findTableStencil(id string) (*tableStencil, error) {
+	for _, stencil := range s.tableStencils {
+		if stencil.ID == id {
+			return stencil, nil
+		}
+	}
+	return nil, fmt.Errorf("Unable to find table stencil with id of %v", id)
+}
+
+func (s *Stenciller) colorData(colors map[string]string, data map[string]string) map[string]string {
 	colored := make(map[string]string, len(data))
 	for key, val := range data {
-		if col, ok := stencil.Colors[key]; ok {
+		if col, ok := colors[key]; ok {
 			colored[key] = s.colorValue(val, col)
 		} else {
 			colored[key] = val

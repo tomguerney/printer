@@ -47,7 +47,7 @@ func (m *MockStenciller) AddTmplStencil(id, template string, colors map[string]s
 	return args.Error(0)
 }
 
-func (m *MockStenciller) AddTableStencil(id string, colors map[string]string) error {
+func (m *MockStenciller) AddTableStencil(id string, headers []string, colors map[string]string) error {
 	args := m.Called(id, colors)
 	return args.Error(0)
 }

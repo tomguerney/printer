@@ -28,7 +28,7 @@ func (suite *StencillerSuite) SetupTest() {
 }
 
 func (suite *StencillerSuite) TestAddTmplStencil() {
-	suite.Empty(suite.Stenciller.stencils)
+	suite.Empty(suite.Stenciller.tmplStencils)
 	id := "test-id"
 	template := "{{ .test }} template"
 	colors := map[string]string{
@@ -36,17 +36,17 @@ func (suite *StencillerSuite) TestAddTmplStencil() {
 	}
 	err := suite.Stenciller.AddTmplStencil(id, template, colors)
 	suite.NoError(err)
-	suite.Len(suite.Stenciller.stencils, 1)
+	suite.Len(suite.Stenciller.tmplStencils, 1)
 }
 
 func (suite *StencillerSuite) TestAddTmplStencilWithExistingID() {
-	stencil := &stencil{ID: "test-id",
+	stencil := &tmplStencil{ID: "test-id",
 		Template: "{{ .test }} template",
 		Colors: map[string]string{
 			"test": "red",
 		}}
-	suite.Stenciller.stencils = append(suite.Stenciller.stencils, stencil)
-	suite.Len(suite.Stenciller.stencils, 1)
+	suite.Stenciller.tmplStencils = append(suite.Stenciller.tmplStencils, stencil)
+	suite.Len(suite.Stenciller.tmplStencils, 1)
 	err := suite.Stenciller.AddTmplStencil(stencil.ID, "{{ .Template }}", nil)
 	suite.Errorf(err, "Stencil with ID test-id already exists")
 }
@@ -84,21 +84,21 @@ func (suite *StencillerSuite) TestTmplStencil() {
 // 	suite.Equal(expected, actual)
 // }
 
-func (suite *StencillerSuite) TestFindStencil() {
-	stencil1 := &stencil{ID: "1"}
-	stencil2 := &stencil{ID: "2"}
-	suite.Stenciller.stencils = []*stencil{stencil1, stencil2}
-	actual, err := suite.Stenciller.findStencil("1")
+func (suite *StencillerSuite) TestFindTmplStencil() {
+	stencil1 := &tmplStencil{ID: "1"}
+	stencil2 := &tmplStencil{ID: "2"}
+	suite.Stenciller.tmplStencils = []*tmplStencil{stencil1, stencil2}
+	actual, err := suite.Stenciller.findTmplStencil("1")
 	suite.NoError(err)
 	suite.Equal(stencil1, actual)
 	suite.NotEqual(stencil2, actual)
 }
 
-func (suite *StencillerSuite) TestNotFindStencil() {
-	stencil1 := &stencil{ID: "1"}
-	stencil2 := &stencil{ID: "2"}
-	suite.Stenciller.stencils = []*stencil{stencil1, stencil2}
-	actual, err := suite.Stenciller.findStencil("3")
+func (suite *StencillerSuite) TestNotFindTmplStencil() {
+	stencil1 := &tmplStencil{ID: "1"}
+	stencil2 := &tmplStencil{ID: "2"}
+	suite.Stenciller.tmplStencils = []*tmplStencil{stencil1, stencil2}
+	actual, err := suite.Stenciller.findTmplStencil("3")
 	suite.Errorf(err, "Unable to find stencil with id of 3")
 	suite.Nil(actual)
 }
@@ -108,7 +108,7 @@ func (suite *StencillerSuite) TestColorData() {
 		"key1": "blueValue",
 		"key2": "greenValue",
 	}
-	stencil := &stencil{
+	stencil := &tmplStencil{
 		ID: "1",
 		Colors: map[string]string{
 			"key1": "blue",
@@ -121,7 +121,7 @@ func (suite *StencillerSuite) TestColorData() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", true)
 	suite.Colorer.On("Color", "value2", "green").Return("greenValue", true)
-	actual := suite.Stenciller.colorData(stencil, data)
+	actual := suite.Stenciller.colorData(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -131,7 +131,7 @@ func (suite *StencillerSuite) TestColorDataWithValueWithoutColorDefinition() {
 		"key2": "value2",
 		"key3": "greenValue3",
 	}
-	stencil := &stencil{
+	stencil := &tmplStencil{
 		ID: "1",
 		Colors: map[string]string{
 			"key1": "blue",
@@ -145,7 +145,7 @@ func (suite *StencillerSuite) TestColorDataWithValueWithoutColorDefinition() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
 	suite.Colorer.On("Color", "value3", "green").Return("greenValue3", true)
-	actual := suite.Stenciller.colorData(stencil, data)
+	actual := suite.Stenciller.colorData(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -155,7 +155,7 @@ func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
 		"key2": "value2",
 		"key3": "value3",
 	}
-	stencil := &stencil{
+	stencil := &tmplStencil{
 		ID: "1",
 		Colors: map[string]string{
 			"key1": "blue",
@@ -169,7 +169,7 @@ func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
 	suite.Colorer.On("Color", "value3", "notacolor").Return("", false)
-	actual := suite.Stenciller.colorData(stencil, data)
+	actual := suite.Stenciller.colorData(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
