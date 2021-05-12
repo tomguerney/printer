@@ -5,7 +5,8 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
+
 	"github.com/tomguerney/printer/internal/colorer"
 	"github.com/tomguerney/printer/internal/domain"
 )
@@ -14,7 +15,6 @@ import (
 type Stenciller struct {
 	stencils []*stencil
 	colorer  domain.Colorer
-	logger   log.Interface
 }
 
 type stencil struct {
@@ -83,7 +83,7 @@ func (s *Stenciller) colorValue(val, col string) string {
 	if coloredVal, ok := s.colorer.Color(val, col); ok {
 		return coloredVal
 	}
-	log.Infof("Unable to set [value=%v] with color [%v]", val, col)
+	log.Info().Msgf("Unable to set [value=%v] with color [%v]", val, col)
 	return val
 }
 

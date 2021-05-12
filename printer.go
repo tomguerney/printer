@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/rs/zerolog/log"
 	s "github.com/tomguerney/printer/internal/setter"
 )
 
@@ -19,6 +20,7 @@ func SetWriter(writer io.Writer) {
 
 // Msg prints a formatted message to output
 func Msg(text string, a ...interface{}) {
+	log.Info().Msg("this is a logged message")
 	setter.Msg(text, a...)
 }
 
