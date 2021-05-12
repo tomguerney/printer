@@ -78,8 +78,8 @@ func (s *Setter) AddTableStencil(id string, headers []string, colors map[string]
 	return s.stenciller.AddTableStencil(id, headers, colors)
 }
 
-// Stencil applies a string map to the stencil with the passed ID and prints it to output
-func (s *Setter) Stencil(id string, data map[string]string) error {
+// TmplStencil applies a string map to the stencil with the passed ID and prints it to output
+func (s *Setter) TmplStencil(id string, data map[string]string) error {
 	result, err := s.stenciller.TmplStencil(id, data)
 	if err != nil {
 		return err
@@ -88,8 +88,8 @@ func (s *Setter) Stencil(id string, data map[string]string) error {
 	return nil
 }
 
-// FStencil applies a string map to the stencil with the passed ID and returns the result
-func (s *Setter) FStencil(id string, data map[string]string) (string, error) {
+// STmplStencil applies a string map to the stencil with the passed ID and returns the result
+func (s *Setter) STmplStencil(id string, data map[string]string) (string, error) {
 	result, err := s.stenciller.TmplStencil(id, data)
 	if err != nil {
 		return "", err
@@ -97,11 +97,11 @@ func (s *Setter) FStencil(id string, data map[string]string) (string, error) {
 	return result, nil
 }
 
-func AddTableStencil(id string, colors map[string]string) {
+func AddTableStencil(id string, headers []string, colors map[string]string) {
 
 }
 
-// StencilTable take an array of string maps and prints stencilled rows to output
-func StencilTable(id string, rows []map[string]string, colors map[string]string) {
+// TableStencil take an array of string maps and prints stencilled rows to output
+func TableStencil(id string, rows []map[string]string, colors map[string]string) {
 
 }

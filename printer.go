@@ -47,22 +47,22 @@ func STabulate(rows [][]string) []string {
 	return s.STabulate(rows)
 }
 
-// AddStencil adds a new stencil
-func AddStencil(id, template string, colors map[string]string) error {
+// AddTmplStencil adds a new stencil
+func AddTmplStencil(id, template string, colors map[string]string) error {
 	return s.AddTmplStencil(id, template, colors)
 }
 
-// Stencil applies a string map to the stencil with the passed ID and prints it to output
-func Stencil(id string, data map[string]string) error {
-	return s.Stencil(id, data)
+// TmplStencil applies a string map to the stencil with the passed ID and prints it to output
+func TmplStencil(id string, data map[string]string) error {
+	return s.TmplStencil(id, data)
 }
 
-// FStencil applies a string map to the stencil with the passed ID and returns the result
-func FStencil(id string, data map[string]string) (string, error) {
-	return s.FStencil(id, data)
+// STmplStencil applies a string map to the stencil with the passed ID and returns the result
+func STmplStencil(id string, data map[string]string) (string, error) {
+	return s.STmplStencil(id, data)
 }
 
-// StencilTable take an array of string maps and prints stencilled rows to output
-func StencilTable(id string, rows []map[string]string) {
+// TableStencil take an array of string maps and prints stencilled rows to output
+func TableStencil(id string, rows []map[string]string) {
 	// return s.StencilTable(id, rows)
 }

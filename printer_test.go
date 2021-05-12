@@ -127,9 +127,9 @@ func (suite *PrinterSuite) TestAddStencilWithExistingID() {
 	colors := map[string]string{
 		"test": "red",
 	}
-	err := AddStencil(id, template, colors)
+	err := AddTmplStencil(id, template, colors)
 	suite.NoError(err)
-	err = AddStencil(id, template, colors)
+	err = AddTmplStencil(id, template, colors)
 	suite.Errorf(err, "Stencil with ID %v already exists")
 }
 
@@ -139,12 +139,12 @@ func (suite *PrinterSuite) TestUseStencil() {
 	colors := map[string]string{
 		"test": "red",
 	}
-	AddStencil(id, template, colors)
+	AddTmplStencil(id, template, colors)
 	data := map[string]string{
 		"test": "value",
 	}
 	expected := "value template\n"
-	err := Stencil(id, data)
+	err := TmplStencil(id, data)
 	suite.NoError(err)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
