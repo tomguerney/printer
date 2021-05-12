@@ -27,19 +27,19 @@ func (suite *StencillerSuite) SetupTest() {
 	suite.Stenciller = &Stenciller{colorer: suite.Colorer}
 }
 
-func (suite *StencillerSuite) TestAddStencil() {
+func (suite *StencillerSuite) TestAddTmplStencil() {
 	suite.Empty(suite.Stenciller.stencils)
 	id := "test-id"
 	template := "{{ .test }} template"
 	colors := map[string]string{
 		"test": "red",
 	}
-	err := suite.Stenciller.AddStencil(id, template, colors)
+	err := suite.Stenciller.AddTmplStencil(id, template, colors)
 	suite.NoError(err)
 	suite.Len(suite.Stenciller.stencils, 1)
 }
 
-func (suite *StencillerSuite) TestAddStencilWithExistingID() {
+func (suite *StencillerSuite) TestAddTmplStencilWithExistingID() {
 	stencil := &stencil{ID: "test-id",
 		Template: "{{ .test }} template",
 		Colors: map[string]string{
@@ -47,26 +47,42 @@ func (suite *StencillerSuite) TestAddStencilWithExistingID() {
 		}}
 	suite.Stenciller.stencils = append(suite.Stenciller.stencils, stencil)
 	suite.Len(suite.Stenciller.stencils, 1)
-	err := suite.Stenciller.AddStencil(stencil.ID, "{{ .Template }}", nil)
+	err := suite.Stenciller.AddTmplStencil(stencil.ID, "{{ .Template }}", nil)
 	suite.Errorf(err, "Stencil with ID test-id already exists")
 }
 
-func (suite *StencillerSuite) TestUseStencil() {
+func (suite *StencillerSuite) TestTmplStencil() {
 	id := "test-id"
 	template := "{{ .test }} template"
 	colors := map[string]string{
 		"test": "red",
 	}
-	suite.Stenciller.AddStencil(id, template, colors)
+	suite.Stenciller.AddTmplStencil(id, template, colors)
 	data := map[string]string {
 		"test": "value",
 	}
 	suite.Colorer.On("Color", "value", "red").Return("redValue", true)
-	actual, err := suite.Stenciller.UseStencil(id, data)
+	actual, err := suite.Stenciller.TmplStencil(id, data)
 	suite.NoError(err)
 	expected := "redValue template\n"
 	suite.Equal(expected, actual)
 }
+
+// func (suite *StencillerSuite) TestTableStencil() {
+// 	id := "test-id"
+// 	colors := map[string]string{
+// 		"test": "blue",
+// 	}
+// 	suite.Stenciller.AddTableStencil(id, colors)
+// 	data := map[string]string {
+// 		"test": "value",
+// 	}
+// 	suite.Colorer.On("Color", "value", "blue").Return("blueValue", true)
+// 	actual, err := suite.Stenciller.TmplStencil(id, data)
+// 	suite.NoError(err)
+// 	expected := "redValue template\n"
+// 	suite.Equal(expected, actual)
+// }
 
 func (suite *StencillerSuite) TestFindStencil() {
 	stencil1 := &stencil{ID: "1"}

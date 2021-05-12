@@ -12,7 +12,7 @@ import (
 
 // Setter prints formatted strings to its configured io.Writer output
 type Setter struct {
-	Writer        io.Writer
+	Writer     io.Writer
 	formatter  domain.Formatter
 	stenciller domain.Stenciller
 }
@@ -54,19 +54,33 @@ func (s *Setter) Tabulate(rows [][]string) {
 	}
 }
 
+// CTabulate takes an array of string arrays, colors them, and prints a table to output
+func (s *Setter) CTabulate(rows [][]string, colors map[string]string) {
+
+	tabulated := s.formatter.Tabulate(rows)
+	for _, row := range tabulated {
+		fmt.Fprint(s.Writer, row)
+	}
+}
+
 // STabulate takes an array of string arrays and return an array of formatted rows
 func (s *Setter) STabulate(rows [][]string) []string {
 	return s.formatter.Tabulate(rows)
 }
 
-// AddStencil adds a new stencil
-func (s *Setter) AddStencil(id, template string, colors map[string]string) error {
-	return s.stenciller.AddStencil(id, template, colors)
+// AddTmplStencil adds a new template stencil
+func (s *Setter) AddTmplStencil(id, template string, colors map[string]string) error {
+	return s.stenciller.AddTmplStencil(id, template, colors)
 }
 
-// UseStencil applies a string map to the stencil with the passed ID and prints it to output
-func (s *Setter) UseStencil(id string, data map[string]string) error {
-	result, err := s.stenciller.UseStencil(id, data)
+// AddTableStencil adds a new table stencil
+func (s *Setter) AddTableStencil(id string, colors map[string]string) error {
+	return s.stenciller.AddTableStencil(id, colors)
+}
+
+// Stencil applies a string map to the stencil with the passed ID and prints it to output
+func (s *Setter) Stencil(id string, data map[string]string) error {
+	result, err := s.stenciller.TmplStencil(id, data)
 	if err != nil {
 		return err
 	}
@@ -74,11 +88,20 @@ func (s *Setter) UseStencil(id string, data map[string]string) error {
 	return nil
 }
 
-// FUseStencil applies a string map to the stencil with the passed ID and returns the result
-func (s *Setter) FUseStencil(id string, data map[string]string) (string, error) {
-	result, err := s.stenciller.UseStencil(id, data)
+// FStencil applies a string map to the stencil with the passed ID and returns the result
+func (s *Setter) FStencil(id string, data map[string]string) (string, error) {
+	result, err := s.stenciller.TmplStencil(id, data)
 	if err != nil {
 		return "", err
 	}
 	return result, nil
+}
+
+func AddTableStencil(id string, colors map[string]string) {
+
+}
+
+// StencilTable take an array of string maps and prints stencilled rows to output
+func StencilTable(id string, rows []map[string]string, colors map[string]string) {
+
 }

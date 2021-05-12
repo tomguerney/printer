@@ -42,14 +42,24 @@ type MockStenciller struct {
 	mock.Mock
 }
 
-func (m *MockStenciller) AddStencil(id, template string, colors map[string]string) error {
+func (m *MockStenciller) AddTmplStencil(id, template string, colors map[string]string) error {
 	args := m.Called(id, template, colors)
 	return args.Error(0)
 }
 
-func (m *MockStenciller) UseStencil(id string, data map[string]string) (string, error) {
+func (m *MockStenciller) AddTableStencil(id string, colors map[string]string) error {
+	args := m.Called(id, colors)
+	return args.Error(0)
+}
+
+func (m *MockStenciller) TmplStencil(id string, data map[string]string) (string, error) {
 	args := m.Called(id, data)
 	return args.String(0), args.Error(1)
+}
+
+func (m *MockStenciller) TableStencil(id string, rows []map[string]string) ([][]string, error) {
+	args := m.Called(id, rows)
+	return args.Get(0).([][]string), args.Error(1)
 }
 
 type SetterSuite struct {
