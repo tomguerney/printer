@@ -8,7 +8,7 @@ import (
 	"github.com/tomguerney/printer/internal/domain"
 )
 
-// Formatter formats text for output
+// Formatter formats strings for simple and consistent output
 type Formatter struct {
 	tabwriterOptions *domain.TabwriterOptions
 }
@@ -20,19 +20,23 @@ func New(tabwriterOptions *domain.TabwriterOptions) *Formatter {
 	}
 }
 
-// Msg creates a formatted message
+// Msg returns a string comprised of the passed text ending with a newline
+// The text may contain formatting verbs that will be formatted with
+// the passed operands
 func (f *Formatter) Msg(text string, a ...interface{}) string {
 	formatted := fmt.Sprintf("%s\n", text)
 	return fmt.Sprintf(formatted, a...)
 }
 
-// Error creates a formatted message prefixed with "Error: "
+// Error returns a string comprised of the passed text prefixed with "Error: " with a newline
+// The text may contain formatting verbs that will be formatted with
+// the passed operands
 func (f *Formatter) Error(text string, a ...interface{}) string {
 	formatted := fmt.Sprintf("Error: %s\n", text)
 	return fmt.Sprintf(formatted, a...)
 }
 
-// Tabulate creates a formmatted table
+// Tabulate returns a formmatted table
 func (f *Formatter) Tabulate(rows [][]string) []string {
 
 	builder := strings.Builder{}
