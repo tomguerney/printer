@@ -4,10 +4,20 @@ import (
 	"io"
 	"os"
 
+	"github.com/tomguerney/printer/internal/domain"
 	"github.com/tomguerney/printer/internal/setter"
 )
 
-var s = setter.New()
+// TabwriterOptions singleton with defaults
+var TabwriterOptions = &domain.TabwriterOptions{
+	Minwidth: 0,
+	Tabwidth: 8,
+	Padding:  4,
+	Padchar:  ' ',
+	Flags:    0,
+}
+
+var s = setter.New(TabwriterOptions)
 
 // Writer is the io.Writer to print to
 var Writer io.Writer = os.Stdout
@@ -47,7 +57,7 @@ func STabulate(rows [][]string) []string {
 	return s.STabulate(rows)
 }
 
-// AddTmplStencil adds a new stencil
+// AddTmplStencil adds a new template stencil
 func AddTmplStencil(id, template string, colors map[string]string) error {
 	return s.AddTmplStencil(id, template, colors)
 }
@@ -62,7 +72,12 @@ func STmplStencil(id string, data map[string]string) (string, error) {
 	return s.STmplStencil(id, data)
 }
 
+// AddTableStencil adds a new table stencil
+func AddTableStencil(id string, headers []string, colors map[string]string) error {
+	return s.AddTableStencil(id, headers, colors)
+}
+
 // TableStencil take an array of string maps and prints stencilled rows to output
-func TableStencil(id string, rows []map[string]string) {
-	// return s.StencilTable(id, rows)
+func TableStencil(id string, rows []map[string]string) error {
+	return s.TableStencil(id, rows)
 }

@@ -18,10 +18,10 @@ type Setter struct {
 }
 
 // New returns a new Setter struct
-func New() *Setter {
+func New(tabwriterOptions *domain.TabwriterOptions) *Setter {
 	return &Setter{
 		os.Stdout,
-		formatter.New(),
+		formatter.New(tabwriterOptions),
 		stenciller.New(),
 	}
 }
@@ -48,15 +48,6 @@ func (s *Setter) SError(text string, a ...interface{}) string {
 
 // Tabulate takes an array of string arrays and prints a table to output
 func (s *Setter) Tabulate(rows [][]string) {
-	tabulated := s.formatter.Tabulate(rows)
-	for _, row := range tabulated {
-		fmt.Fprint(s.Writer, row)
-	}
-}
-
-// CTabulate takes an array of string arrays, colors them, and prints a table to output
-func (s *Setter) CTabulate(rows [][]string, colors map[string]string) {
-
 	tabulated := s.formatter.Tabulate(rows)
 	for _, row := range tabulated {
 		fmt.Fprint(s.Writer, row)
@@ -97,11 +88,21 @@ func (s *Setter) STmplStencil(id string, data map[string]string) (string, error)
 	return result, nil
 }
 
-func AddTableStencil(id string, headers []string, colors map[string]string) {
-
+// TableStencil take an array of string maps and prints stencilled rows to output
+func (s *Setter) TableStencil(id string, rows []map[string]string) error {
+	result, err := s.stenciller.TableStencil(id, rows)
+	if err != nil {
+		return err
+	}
+	s.Tabulate(result)
+	return nil
 }
 
-// TableStencil take an array of string maps and prints stencilled rows to output
-func TableStencil(id string, rows []map[string]string, colors map[string]string) {
-
+// STableStencil take an array of string maps and returns an array of stencilled rows
+func (s *Setter) STableStencil(id string, dataRows []map[string]string) ([]string, error) {
+	result, err := s.stenciller.TableStencil(id, dataRows)
+	if err != nil {
+		return nil, err
+	}
+	return s.STabulate(result), nil
 }

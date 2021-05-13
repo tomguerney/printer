@@ -20,3 +20,10 @@ type Stenciller interface {
 type Colorer interface {
 	Color(text, color string) (string, bool)
 }
+
+// TabwriterOptions for passing to tabwriter
+type TabwriterOptions struct {
+	Minwidth, Tabwidth, Padding int
+	Padchar                     byte
+	Flags                       uint
+}

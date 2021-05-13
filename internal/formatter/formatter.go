@@ -4,14 +4,20 @@ import (
 	"fmt"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/tomguerney/printer/internal/domain"
 )
 
 // Formatter formats text for output
-type Formatter struct{}
+type Formatter struct {
+	tabwriterOptions *domain.TabwriterOptions
+}
 
 // New returns a pointer to a new Formatter struct
-func New() *Formatter {
-	return &Formatter{}
+func New(tabwriterOptions *domain.TabwriterOptions) *Formatter {
+	return &Formatter{
+		tabwriterOptions,
+	}
 }
 
 // Msg creates a formatted message
@@ -30,7 +36,14 @@ func (f *Formatter) Error(text string, a ...interface{}) string {
 func (f *Formatter) Tabulate(rows [][]string) []string {
 
 	builder := strings.Builder{}
-	writer := tabwriter.NewWriter(&builder, 0, 8, 4, ' ', 0)
+	writer := tabwriter.NewWriter(
+		&builder,
+		f.tabwriterOptions.Minwidth,
+		f.tabwriterOptions.Tabwidth,
+		f.tabwriterOptions.Padding,
+		f.tabwriterOptions.Padchar,
+		f.tabwriterOptions.Flags,
+	)
 
 	for _, row := range rows {
 		fmt.Fprintln(writer, fmt.Sprintf("%s", strings.Join(row, "\t")))

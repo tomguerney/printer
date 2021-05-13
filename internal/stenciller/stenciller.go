@@ -25,9 +25,9 @@ type tmplStencil struct {
 }
 
 type tableStencil struct {
-	ID      string
-	Headers []string
-	Colors  map[string]string
+	ID           string
+	Colors       map[string]string
+	Headers      []string
 }
 
 // New returns a pointer to a new Stenciller struct
