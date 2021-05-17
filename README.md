@@ -1,4 +1,6 @@
 # Printer
 
-Printer is an output component used in Guerney Tools 
+## A module of the Tomtoolery project
+
+Printer is a module for formatting, coloring, and tabulating output. 
 

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"github.com/tomguerney/printer/internal/domain"
 )
 
 type FormatterSuite struct {
@@ -12,7 +13,14 @@ type FormatterSuite struct {
 }
 
 func (suite *FormatterSuite) SetupTest() {
-	suite.Formatter = &Formatter{}
+	tabwriterOptions := &domain.TabwriterOptions{
+		Minwidth: 0,
+		Tabwidth: 8,
+		Padding:  4,
+		Padchar:  ' ',
+		Flags:    0,
+	}
+	suite.Formatter = &Formatter{tabwriterOptions}
 }
 
 func (suite *FormatterSuite) TestMessage() {
