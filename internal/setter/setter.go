@@ -27,22 +27,26 @@ func New(tabwriterOptions *domain.TabwriterOptions) *Setter {
 }
 
 // Msg prints a formatted message to output
-func (s *Setter) Msg(text string, a ...interface{}) {
+func (s *Setter) Msg(i interface{}, a ...interface{}) {
+	text := fmt.Sprint(i) 
 	fmt.Fprintf(s.Writer, s.formatter.Msg(text, a...))
 }
 
 // SMsg returns a formatted message string
-func (s *Setter) SMsg(text string, a ...interface{}) string {
+func (s *Setter) SMsg(i interface{}, a ...interface{}) string {
+	text := fmt.Sprint(i) 
 	return s.formatter.Msg(text, a...)
 }
 
 // Error prints a formatted error message to output
-func (s *Setter) Error(text string, a ...interface{}) {
+func (s *Setter) Error(i interface{}, a ...interface{}) {
+	text := fmt.Sprint(i) 
 	fmt.Fprintf(s.Writer, s.formatter.Error(text, a...))
 }
 
 // SError returns a formatted error message string
-func (s *Setter) SError(text string, a ...interface{}) string {
+func (s *Setter) SError(i interface{}, a ...interface{}) string {
+	text := fmt.Sprint(i) 
 	return s.formatter.Error(text, a...)
 }
 

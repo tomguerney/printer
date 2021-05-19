@@ -19,6 +19,8 @@ var TabwriterOptions = &domain.TabwriterOptions{
 
 var s = setter.New(TabwriterOptions)
 
+//TODO error goes to stderr
+
 // Writer is the io.Writer to print to
 var Writer io.Writer = os.Stdout
 
@@ -28,23 +30,23 @@ func SetWriter(writer io.Writer) {
 }
 
 // Msg prints a formatted message to output
-func Msg(text string, a ...interface{}) {
-	s.Msg(text, a...)
+func Msg(i interface{}, a ...interface{}) {
+	s.Msg(i, a...)
 }
 
 // SMsg returns a formatted message string
-func SMsg(text string, a ...interface{}) string {
-	return s.SMsg(text, a...)
+func SMsg(i interface{}, a ...interface{}) string {
+	return s.SMsg(i, a...)
 }
 
 // Error prints a formatted error message to output
-func Error(text string, a ...interface{}) {
-	s.Error(text, a...)
+func Error(i interface{}, a ...interface{}) {
+	s.Error(i, a...)
 }
 
 // SError returns a formatted error message string
-func SError(text string, a ...interface{}) string {
-	return s.SError(text, a...)
+func SError(i interface{}, a ...interface{}) string {
+	return s.SError(i, a...)
 }
 
 // Tabulate takes an array of string arrays and prints a table to output
