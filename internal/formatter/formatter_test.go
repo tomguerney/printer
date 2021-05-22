@@ -86,6 +86,24 @@ func (suite *FormatterSuite) TestTabulateWithMorePadding() {
 	suite.Equal(expected, actual)
 }
 
+func (suite *FormatterSuite) TestTabulateWithHeaders() {
+	table := [][]string{
+		{"header1", "h2", "header3", "h4"},
+		{"The", "first", "row"},
+		{"This", "is", "another", "row"},
+		{"The", "tertiary", "row"},
+	}
+	expected := []string{
+		"header1    h2          header3    h4",
+		"-------    --------    -------    ---",
+		"The        first       row",
+		"This       is          another    row",
+		"The        tertiary    row",
+	}
+	actual := suite.Formatter.TabulateWithHeaders(table)
+	suite.Equal(expected, actual)
+}
+
 func TestFormatterSuite(t *testing.T) {
 	suite.Run(t, new(FormatterSuite))
 }

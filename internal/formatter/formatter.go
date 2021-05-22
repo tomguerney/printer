@@ -40,7 +40,7 @@ func (f *Formatter) Error(text string, a ...interface{}) string {
 // Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
 // per the tabwriterOptions passed into the NewWriter function from the
 // "text/tabwriter" package from the Go standard library. The default
-// tabwriterOptions are set at the root printer package level. 
+// tabwriterOptions are set at the root printer package level.
 //
 // Tabulate returns a one-dimensional slice of strings, with each element formed
 // from a row of strings from the original 2D slice. Each row is spaced such
@@ -66,4 +66,40 @@ func (f *Formatter) Tabulate(rows [][]string) []string {
 	table := strings.Split(builder.String(), "\n")
 
 	return table[:len(table)-1]
+}
+
+func (f *Formatter) TabulateWithHeaders(rows [][]string) []string {
+	divRow := f.getDivRow(rows)
+	rowsWithHeader := append(rows[:2], rows[1:]...)
+	rowsWithHeader[1] = divRow
+	return f.Tabulate(rowsWithHeader)
+}
+
+func (f *Formatter) getDivRow(rows [][]string) []string {
+	colWidths := f.getColWidths(rows)
+	divRow := make([]string, len(colWidths))
+	for col, width := range colWidths {
+		divRow[col] = strings.Repeat("-", width)
+	}
+	return divRow
+}
+
+func (f *Formatter) getColWidths(
+	rows [][]string,
+) map[int]int {
+	maxCols := 0
+	for _, row := range rows {
+		if len(row) > maxCols {
+			maxCols = len(row)
+		}
+	}
+	widths := make(map[int]int, maxCols)
+	for _, row := range rows {
+		for col, elem := range row {
+			if len(elem) > widths[col] {
+				widths[col] = len(elem)
+			}
+		}
+	}
+	return widths
 }

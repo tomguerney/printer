@@ -66,7 +66,7 @@ func (s *Stenciller) AddTmplStencil(
 	}
 	for _, stencil := range s.tmplStencils {
 		if stencil.ID == id {
-			return fmt.Errorf("Stencil with ID %v already exists", id)
+			return fmt.Errorf("Template Stencil with ID %v already exists", id)
 		}
 	}
 	s.tmplStencils = append(s.tmplStencils, &tmplStencil{id, template, colors})
@@ -84,7 +84,7 @@ func (s *Stenciller) AddTableStencil(
 	}
 	for _, stencil := range s.tableStencils {
 		if stencil.ID == id {
-			return fmt.Errorf("Stencil with ID %v already exists", id)
+			return fmt.Errorf("Table Stencil with ID %v already exists", id)
 		}
 	}
 	s.tableStencils = append(
@@ -106,14 +106,11 @@ func (s *Stenciller) TmplStencil(
 		return "", err
 	}
 	coloredData := s.colorData(stencil.Colors, data)
-	if stencil.Template == "" {
-		log.Info().Msgf("Template with ID %v is an empty string", id)
-	}
-	result, err := s.interpolate(stencil.Template, coloredData)
+	interpolated, err := s.interpolate(stencil.Template, coloredData)
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%v\n", result), nil
+	return fmt.Sprintf("%v\n", interpolated), nil
 }
 
 // TableStencil takes the ID of a Table Stencil and a slice of "row" maps with
@@ -122,22 +119,22 @@ func (s *Stenciller) TmplStencil(
 // and returns the result.
 func (s *Stenciller) TableStencil(
 	id string,
-	dataRows []map[string]string,
-) ([][]string, error) {
+	rawDataRows []map[string]string,
+) (colorSliceRows [][]string, err error) {
 	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err
 	}
-	coloredRows := [][]string{}
-	for _, row := range dataRows {
-		coloredData := s.colorData(stencil.Colors, row)
-		coloredRow := make([]string, len(coloredData))
-		for _, value := range coloredData {
-			coloredRow = append(coloredRow, value)
+	colorSliceRows = append(colorSliceRows, stencil.Headers)
+	for _, rawDataRow := range rawDataRows {
+		colorDataRow := s.colorData(stencil.Colors, rawDataRow)
+		colorSliceRow := make([]string, 0, len(colorDataRow))
+		for _, value := range colorDataRow {
+			colorSliceRow = append(colorSliceRow, value)
 		}
-		coloredRows = append(coloredRows, coloredRow)
+		colorSliceRows = append(colorSliceRows, colorSliceRow)
 	}
-	return coloredRows, nil
+	return colorSliceRows, nil
 }
 
 func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
