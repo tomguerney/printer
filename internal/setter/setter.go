@@ -10,7 +10,7 @@ import (
 	"github.com/tomguerney/printer/internal/stenciller"
 )
 
-// Setter prints formatted strings to its configured io.Writer output
+// Setter prints formatted strings to the configured io.Writer
 type Setter struct {
 	Writer     io.Writer
 	formatter  domain.Formatter
@@ -26,31 +26,47 @@ func New(tabwriterOptions *domain.TabwriterOptions) *Setter {
 	}
 }
 
-// Msg prints a formatted message to output
+// Msg prints the passed text appended with a newline. If the text contains
+// formatting verbs (e.g. %v), they will be formatted as per the
+// "...interface{}" variadic parameter in the fashion of fmt.Printf()
 func (s *Setter) Msg(i interface{}, a ...interface{}) {
-	text := fmt.Sprint(i) 
+	text := fmt.Sprint(i)
 	fmt.Fprintf(s.Writer, s.formatter.Msg(text, a...))
 }
 
-// SMsg returns a formatted message string
+// SMsg returns the passed text appended with a newline. If the text contains
+// formatting verbs (e.g. %v), they will be formatted as per the
+// "...interface{}" variadic parameter in the fashion of fmt.Printf()
 func (s *Setter) SMsg(i interface{}, a ...interface{}) string {
-	text := fmt.Sprint(i) 
+	text := fmt.Sprint(i)
 	return s.formatter.Msg(text, a...)
 }
 
-// Error prints a formatted error message to output
+// Error prints the passed text prefixed with "Error: " and appended with a
+// newline. If the text contains formatting verbs (e.g. %v), they will be
+// formatted as per the "...interface{}" variadic parameter in the fashion of
+// fmt.Printf()
 func (s *Setter) Error(i interface{}, a ...interface{}) {
-	text := fmt.Sprint(i) 
+	text := fmt.Sprint(i)
 	fmt.Fprintf(s.Writer, s.formatter.Error(text, a...))
 }
 
-// SError returns a formatted error message string
+// SError returns the passed text prefixed with "Error: " and appended with a
+// newline. If the text contains formatting verbs (e.g. %v), they will be
+// formatted as per the "...interface{}" variadic parameter in the fashion of
+// fmt.Printf()
 func (s *Setter) SError(i interface{}, a ...interface{}) string {
-	text := fmt.Sprint(i) 
+	text := fmt.Sprint(i)
 	return s.formatter.Error(text, a...)
 }
 
-// Tabulate takes an array of string arrays and prints a table to output
+// Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
+// per the tabwriterOptions passed into the domain.Formatter and the internal
+// logic of that package. The default tabwriterOptions are set at the root
+// printer package level.
+//
+// Tabulate prints each row from the original 2D slice spaced such that each
+// element in each row appear vertically aligned in equally-spaced columns.
 func (s *Setter) Tabulate(rows [][]string) {
 	tabulated := s.formatter.Tabulate(rows)
 	for _, row := range tabulated {
@@ -58,22 +74,29 @@ func (s *Setter) Tabulate(rows [][]string) {
 	}
 }
 
-// STabulate takes an array of string arrays and return an array of formatted rows
+// STabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
+// per the tabwriterOptions passed into the domain.Formatter and the internal
+// logic of that package. The default tabwriterOptions are set at the root
+// printer package level.
+//
+// STabulate returns a one-dimensional slice of strings, with each element
+// formed from a row of strings from the original 2D slice. Each row is spaced
+// such that when the slice is printed row by row, the element in each row
+// appear vertically aligned in equally-spaced columns
 func (s *Setter) STabulate(rows [][]string) []string {
 	return s.formatter.Tabulate(rows)
 }
 
-// AddTmplStencil adds a new template stencil
-func (s *Setter) AddTmplStencil(id, template string, colors map[string]string) error {
-	return s.stenciller.AddTmplStencil(id, template, colors)
-}
-
-// AddTableStencil adds a new table stencil
-func (s *Setter) AddTableStencil(id string, headers []string, colors map[string]string) error {
-	return s.stenciller.AddTableStencil(id, headers, colors)
-}
-
-// TmplStencil applies a string map to the stencil with the passed ID and prints it to output
+// TmplStencil takes the ID of a Template Stencil and a "data" map with string
+// key/values. It returns an error if it can't find a Stencil with the passed
+// ID. It applies the Template Stencil to the map and prints the result.
+//
+// A Template Stencil is comprised of an ID, a "color" map of string key/values,
+// and a template string as per the "html/template" package from the Go standard
+// library. When a Template Stencil is applied to a data map, if finds any key
+// in the map that matches a key in the Template Stencil's color map and
+// transforms the data value string to the color of the color value. The data
+// map is then applied to the template to produce a single string.
 func (s *Setter) TmplStencil(id string, data map[string]string) error {
 	result, err := s.stenciller.TmplStencil(id, data)
 	if err != nil {
@@ -83,8 +106,13 @@ func (s *Setter) TmplStencil(id string, data map[string]string) error {
 	return nil
 }
 
-// STmplStencil applies a string map to the stencil with the passed ID and returns the result
-func (s *Setter) STmplStencil(id string, data map[string]string) (string, error) {
+// STmplStencil takes the ID of a Template Stencil and a "data" map with string
+// key/values. It returns an error if it can't find a Stencil with the passed
+// ID. It applies the Template Stencil to the map and returns the result.
+func (s *Setter) STmplStencil(
+	id string,
+	data map[string]string,
+) (string, error) {
 	result, err := s.stenciller.TmplStencil(id, data)
 	if err != nil {
 		return "", err
@@ -92,7 +120,17 @@ func (s *Setter) STmplStencil(id string, data map[string]string) (string, error)
 	return result, nil
 }
 
-// TableStencil take an array of string maps and prints stencilled rows to output
+// TableStencil takes the ID of a Table Stencil and a slice of "row" maps with
+// string key/values. It returns an error if it can't find a Stencil with the
+// passed ID. It applies the Table Stencil to the map slice and tabulates and
+// prints the result.
+//
+// A Table Stencil is comprised of an ID, a "color" map of string key/values,
+// and a "headers" string slice. When a Table Stencil is applied to a slice of
+// row maps, it loops through the rows, finding any key in the map that matches
+// a key in the Stencil's color map and transforms the data value string to the
+// color of the color value. It returns the rows and columns as a 2D string
+// slice with a prefixed header row.
 func (s *Setter) TableStencil(id string, rows []map[string]string) error {
 	result, err := s.stenciller.TableStencil(id, rows)
 	if err != nil {
@@ -102,11 +140,32 @@ func (s *Setter) TableStencil(id string, rows []map[string]string) error {
 	return nil
 }
 
-// STableStencil take an array of string maps and returns an array of stencilled rows
+// STableStencil takes the ID of a Table Stencil and a slice of "row" maps with
+// string key/values. It returns an error if it can't find a Stencil with the
+// passed ID. It applies the Table Stencil to the map slice and tabulates and
+// returns the result.
 func (s *Setter) STableStencil(id string, dataRows []map[string]string) ([]string, error) {
 	result, err := s.stenciller.TableStencil(id, dataRows)
 	if err != nil {
 		return nil, err
 	}
 	return s.STabulate(result), nil
+}
+
+// AddTmplStencil adds a new Template Stencil with the passed ID and colors.
+func (s *Setter) AddTmplStencil(
+	id, template string,
+	colors map[string]string,
+) error {
+	return s.stenciller.AddTmplStencil(id, template, colors)
+}
+
+// AddTableStencil adds a new table Stencil with the passed ID, headers, and
+// colors.
+func (s *Setter) AddTableStencil(
+	id string,
+	headers []string,
+	colors map[string]string,
+) error {
+	return s.stenciller.AddTableStencil(id, headers, colors)
 }

@@ -37,8 +37,8 @@ func (f *Formatter) Error(text string, a ...interface{}) string {
 	return fmt.Sprintf(formatted, a...)
 }
 
-// Tabulate takes a 2D slice of rows and columns. The 2D slice is tabuled as per
-// the tabwriterOptions passed into the NewWriter function from the
+// Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
+// per the tabwriterOptions passed into the NewWriter function from the
 // "text/tabwriter" package from the Go standard library. The default
 // tabwriterOptions are set at the root printer package level. 
 //
