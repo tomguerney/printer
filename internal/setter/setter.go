@@ -10,7 +10,7 @@ import (
 	"github.com/tomguerney/printer/internal/stenciller"
 )
 
-// Setter prints formatted strings to the configured io.Writer
+// Setter prints formatted and stencilled strings to the set io.Writer
 type Setter struct {
 	Writer     io.Writer
 	formatter  domain.Formatter
@@ -88,13 +88,13 @@ func (s *Setter) STabulate(rows [][]string) []string {
 }
 
 // TmplStencil takes the ID of a Template Stencil and a "data" map with string
-// key/values. It returns an error if it can't find a Stencil with the passed
-// ID. It applies the Template Stencil to the map and prints the result.
+// key/value pairs. It returns an error if it can't find a Stencil with the
+// passed ID. It applies the Template Stencil to the map and prints the result.
 //
-// A Template Stencil is comprised of an ID, a "color" map of string key/values,
-// and a template string as per the "html/template" package from the Go standard
-// library. When a Template Stencil is applied to a data map, if finds any key
-// in the map that matches a key in the Template Stencil's color map and
+// A Template Stencil is comprised of an ID, a "color" map of string key/value
+// pairs, and a template string as per the "html/template" package from the Go
+// standard library. When a Template Stencil is applied to a data map, it finds
+// any key in the map that matches a key in the Template Stencil's color map and
 // transforms the data value string to the color of the color value. The data
 // map is then applied to the template to produce a single string.
 func (s *Setter) TmplStencil(id string, data map[string]string) error {
@@ -127,10 +127,10 @@ func (s *Setter) STmplStencil(
 //
 // A Table Stencil is comprised of an ID, a "color" map of string key/values,
 // and a "headers" string slice. When a Table Stencil is applied to a slice of
-// row maps, it loops through the rows, finding any key in the map that matches
-// a key in the Stencil's color map and transforms the data value string to the
-// color of the color value. It returns the rows and columns as a 2D string
-// slice with a prefixed header row.
+// row maps, the Stenciller loops through the rows, finding any key in the map
+// that matches a key in the Stencil's color map and transforms the data value
+// string to the color of the color value. It returns the rows and columns as a
+// 2D string slice with a prefixed header row.
 func (s *Setter) TableStencil(id string, rows []map[string]string) error {
 	result, err := s.stenciller.TableStencil(id, rows)
 	if err != nil {

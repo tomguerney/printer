@@ -11,7 +11,26 @@ import (
 	"github.com/tomguerney/printer/internal/domain"
 )
 
-// Stenciller takes structs and formats their field values to predefined templates and colors
+// Stenciller formats "data" maps of string key/value pairs according to
+// predefined Stencils.
+//
+// Stencils are either Template Stencils or Table Stencils.
+//
+// A Template Stencil is comprised of an ID, a "color" map of string key/value
+// pairs, and a template string as per the "html/template" package from the Go
+// standard library. When a Template Stencil is applied to a "data" map of
+// string key/value pairs, it finds any key in the map that matches a key in the
+// Template Stencil's color map and transforms the data value string to the
+// color of the color value. The data map is then applied to the template to
+// produce a single string.
+//
+// A Table Stencil is comprised of an ID, a "color" map of string key/value
+// pairs, and a "headers" string slice. When a Table Stencil is applied to a
+// slice of "row" maps of string key/value pairs, the Stenciller loops through
+// the rows, finding any key in the map that matches a key in the Stencil's
+// color map and transforms the data value string to the color of the color
+// value. It returns the rows and columns as a 2D string slice with a prefixed
+// header row.
 type Stenciller struct {
 	tmplStencils  []*tmplStencil
 	tableStencils []*tableStencil
@@ -25,9 +44,9 @@ type tmplStencil struct {
 }
 
 type tableStencil struct {
-	ID           string
-	Colors       map[string]string
-	Headers      []string
+	ID      string
+	Colors  map[string]string
+	Headers []string
 }
 
 // New returns a pointer to a new Stenciller struct
@@ -37,8 +56,11 @@ func New() *Stenciller {
 	}
 }
 
-// AddTmplStencil adds a new stencil with a template
-func (s *Stenciller) AddTmplStencil(id, template string, colors map[string]string) error {
+// AddTmplStencil adds a new Template Stencil
+func (s *Stenciller) AddTmplStencil(
+	id, template string,
+	colors map[string]string,
+) error {
 	if id == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
@@ -51,8 +73,12 @@ func (s *Stenciller) AddTmplStencil(id, template string, colors map[string]strin
 	return nil
 }
 
-// AddTableStencil adds a new stencil for a table
-func (s *Stenciller) AddTableStencil(id string, headers []string, colors map[string]string) error {
+// AddTableStencil adds a new Table Stencil
+func (s *Stenciller) AddTableStencil(
+	id string,
+	headers []string,
+	colors map[string]string,
+) error {
 	if id == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
@@ -61,12 +87,20 @@ func (s *Stenciller) AddTableStencil(id string, headers []string, colors map[str
 			return fmt.Errorf("Stencil with ID %v already exists", id)
 		}
 	}
-	s.tableStencils = append(s.tableStencils, &tableStencil{ID: id, Headers: headers, Colors: colors})
+	s.tableStencils = append(
+		s.tableStencils,
+		&tableStencil{ID: id, Headers: headers, Colors: colors})
 	return nil
 }
 
-// TmplStencil applies a string map to the stencil with the passed ID
-func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, error) {
+// TmplStencil takes the ID of a Template Stencil and a "data" map with string
+// key/value pairs. It returns an error if it can't find a Stencil with the
+// passed ID or template interpolation fails. It applies the Template Stencil to
+// the data map and returns the result.
+func (s *Stenciller) TmplStencil(
+	id string,
+	data map[string]string,
+) (string, error) {
 	stencil, err := s.findTmplStencil(id)
 	if err != nil {
 		return "", err
@@ -82,8 +116,14 @@ func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, err
 	return fmt.Sprintf("%v\n", result), nil
 }
 
-// TableStencil applies a slice of string maps to the stencil with the passed ID
-func (s *Stenciller) TableStencil(id string, dataRows []map[string]string) ([][]string, error) {
+// TableStencil takes the ID of a Table Stencil and a slice of "row" maps with
+// string key/values. It returns an error if it can't find a Stencil with the
+// passed ID. It applies the Table Stencil to the row map slice and tabulates
+// and returns the result.
+func (s *Stenciller) TableStencil(
+	id string,
+	dataRows []map[string]string,
+) ([][]string, error) {
 	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err
@@ -118,7 +158,10 @@ func (s *Stenciller) findTableStencil(id string) (*tableStencil, error) {
 	return nil, fmt.Errorf("Unable to find table stencil with id of %v", id)
 }
 
-func (s *Stenciller) colorData(colors map[string]string, data map[string]string) map[string]string {
+func (s *Stenciller) colorData(
+	colors map[string]string,
+	data map[string]string,
+) map[string]string {
 	colored := make(map[string]string, len(data))
 	for key, val := range data {
 		if col, ok := colors[key]; ok {
@@ -138,7 +181,10 @@ func (s *Stenciller) colorValue(val, col string) string {
 	return val
 }
 
-func (s *Stenciller) interpolate(tmpl string, data map[string]string) (string, error) {
+func (s *Stenciller) interpolate(
+	tmpl string,
+	data map[string]string,
+) (string, error) {
 	builder := strings.Builder{}
 	parsed, err := template.New("stencil").Parse(tmpl)
 	if err != nil {
