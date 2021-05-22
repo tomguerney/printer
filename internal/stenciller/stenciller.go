@@ -145,10 +145,8 @@ func (s *Stenciller) prependHeaders(
 	rows [][]string,
 	headers []string,
 ) [][]string {
-	rowsWithHeader := append(rows[:2], rows[0:]...)
-	rowsWithHeader[0] = headers
-	rowsWithHeader[1] = s.createDivRow(rows)
-	return rowsWithHeader
+	rowsWithHeader := [][]string{headers, s.createDivRow(rows)}
+	return append(rowsWithHeader, rows...)
 }
 
 func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
