@@ -144,8 +144,11 @@ func (s *Setter) TableStencil(id string, rows []map[string]string) error {
 // string key/values. It returns an error if it can't find a Stencil with the
 // passed ID. It applies the Table Stencil to the map slice and tabulates and
 // returns the result.
-func (s *Setter) STableStencil(id string, dataRows []map[string]string) ([]string, error) {
-	result, err := s.stenciller.TableStencil(id, dataRows)
+func (s *Setter) STableStencil(
+	id string,
+	rows []map[string]string,
+) ([]string, error) {
+	result, err := s.stenciller.TableStencil(id, rows)
 	if err != nil {
 		return nil, err
 	}

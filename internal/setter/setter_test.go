@@ -1,6 +1,7 @@
 package setter
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -42,22 +43,36 @@ type MockStenciller struct {
 	mock.Mock
 }
 
-func (m *MockStenciller) AddTmplStencil(id, template string, colors map[string]string) error {
+func (m *MockStenciller) AddTmplStencil(
+	id,
+	template string,
+	colors map[string]string,
+) error {
 	args := m.Called(id, template, colors)
 	return args.Error(0)
 }
 
-func (m *MockStenciller) AddTableStencil(id string, headers []string, colors map[string]string) error {
+func (m *MockStenciller) AddTableStencil(
+	id string,
+	headers []string,
+	colors map[string]string,
+) error {
 	args := m.Called(id, colors)
 	return args.Error(0)
 }
 
-func (m *MockStenciller) TmplStencil(id string, data map[string]string) (string, error) {
+func (m *MockStenciller) TmplStencil(
+	id string,
+	data map[string]string,
+) (string, error) {
 	args := m.Called(id, data)
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockStenciller) TableStencil(id string, rows []map[string]string) ([][]string, error) {
+func (m *MockStenciller) TableStencil(
+	id string,
+	rows []map[string]string,
+) ([][]string, error) {
 	args := m.Called(id, rows)
 	return args.Get(0).([][]string), args.Error(1)
 }
@@ -86,14 +101,6 @@ func (suite *SetterSuite) TestMessage() {
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
-func (suite *SetterSuite) TestSMessage() {
-	msg := "test message"
-	expected := "formatted string"
-	suite.Formatter.On("Msg", msg, mock.Anything).Return(expected)
-	actual := suite.Setter.SMsg(msg)
-	suite.Equal(expected, actual)
-}
-
 func (suite *SetterSuite) TestMessageWithArgument() {
 	msg := "test message"
 	args := "test args"
@@ -101,6 +108,14 @@ func (suite *SetterSuite) TestMessageWithArgument() {
 	suite.Formatter.On("Msg", mock.Anything, mock.Anything).Return(expected)
 	suite.Setter.Msg(msg, args)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+}
+
+func (suite *SetterSuite) TestSMessage() {
+	msg := "test message"
+	expected := "formatted string"
+	suite.Formatter.On("Msg", msg, mock.Anything).Return(expected)
+	actual := suite.Setter.SMsg(msg)
+	suite.Equal(expected, actual)
 }
 
 func (suite *SetterSuite) TestSMessageWithArgument() {
@@ -120,14 +135,6 @@ func (suite *SetterSuite) TestError() {
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
-func (suite *SetterSuite) TestSError() {
-	errMsg := "test error message"
-	expected := "formatted error string"
-	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
-	actual := suite.Setter.SError(errMsg)
-	suite.Equal(expected, actual)
-}
-
 func (suite *SetterSuite) TestErrorWithArgument() {
 	errMsg := "test message %v"
 	args := "test arg"
@@ -135,6 +142,14 @@ func (suite *SetterSuite) TestErrorWithArgument() {
 	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
 	suite.Setter.Error(errMsg, args)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+}
+
+func (suite *SetterSuite) TestSError() {
+	errMsg := "test error message"
+	expected := "formatted error string"
+	suite.Formatter.On("Error", errMsg, mock.Anything).Return(expected)
+	actual := suite.Setter.SError(errMsg)
+	suite.Equal(expected, actual)
 }
 
 func (suite *SetterSuite) TestSErrorWithArgument() {
@@ -179,6 +194,95 @@ func (suite *SetterSuite) TestSTabulate() {
 	actual := suite.Setter.STabulate(table)
 	suite.Equal(expected, actual)
 }
+
+func (suite *SetterSuite) TestTmplStencil() {
+	id := "test id"
+	data := map[string]string{"key": "value"}
+	expected := "stencilled string"
+	suite.Stenciller.On("TmplStencil", id, data).Return(expected, nil)
+	err := suite.Setter.TmplStencil(id, data)
+	suite.NoError(err)
+	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+}
+
+func (suite *SetterSuite) TestTmplStencilWithError() {
+	id := "test id"
+	data := map[string]string{"key": "value"}
+	suite.Stenciller.On("TmplStencil", id, data).
+		Return("", errors.New("error"))
+	err := suite.Setter.TmplStencil(id, data)
+	suite.Error(err)
+	suite.Writer.AssertNotCalled(suite.T(), "Write", mock.Anything)
+}
+
+func (suite *SetterSuite) TestSTmplStencil() {
+	id := "test id"
+	data := map[string]string{"key": "value"}
+	expected := "stencilled string"
+	suite.Stenciller.On("TmplStencil", id, data).Return(expected, nil)
+	actual, err := suite.Setter.STmplStencil(id, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
+func (suite *SetterSuite) TestSTmplStencilWithError() {
+	id := "test id"
+	data := map[string]string{"key": "value"}
+	suite.Stenciller.On("TmplStencil", id, data).
+		Return("", errors.New("error"))
+	actual, err := suite.Setter.STmplStencil(id, data)
+	suite.Error(err)
+	suite.Equal("", actual)
+}
+
+func (suite *SetterSuite) TestTableStencil() {
+	id := "test id"
+	rows := []map[string]string{{"key": "value"}}
+	tableStencilResult := [][]string{{"row1a", "row1b"}, {"row2a", "row2b"}}
+	tabulateResult := []string{"row1", "row2"}
+	suite.Stenciller.On("TableStencil", id, rows).
+		Return(tableStencilResult, nil)
+	suite.Formatter.On("Tabulate", mock.Anything).Return(tabulateResult)
+	err := suite.Setter.TableStencil(id, rows)
+	suite.NoError(err)
+	suite.Writer.AssertCalled(suite.T(), "Write", tabulateResult[0])
+}
+
+func (suite *SetterSuite) TestTableStencilWithError() {
+	id := "test id"
+	rows := []map[string]string{{"key": "value"}}
+	suite.Stenciller.On("TableStencil", id, rows).
+		Return([][]string{}, errors.New("error"))
+	err := suite.Setter.TableStencil(id, rows)
+	suite.Error(err)
+	suite.Formatter.AssertNotCalled(suite.T(), "Tabulate", mock.Anything)
+	suite.Writer.AssertNotCalled(suite.T(), "Write", mock.Anything)
+}
+
+func (suite *SetterSuite) TestSTableStencil() {
+	id := "test id"
+	rows := []map[string]string{{"key": "value"}}
+	tableStencilResult := [][]string{{"row1a", "row1b"}, {"row2a", "row2b"}}
+	expected := []string{"row1", "row2"}
+	suite.Stenciller.On("TableStencil", id, rows).
+		Return(tableStencilResult, nil)
+	suite.Formatter.On("Tabulate", mock.Anything).Return(expected)
+	actual, err := suite.Setter.STableStencil(id, rows)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
+func (suite *SetterSuite) TestSTableStencilWithError() {
+	id := "test id"
+	rows := []map[string]string{{"key": "value"}}
+	suite.Stenciller.On("TableStencil", id, rows).
+		Return([][]string{}, errors.New("error"))
+	result, err := suite.Setter.STableStencil(id, rows)
+	suite.Error(err)
+	suite.Len(result, 0)
+	suite.Formatter.AssertNotCalled(suite.T(), "Tabulate", mock.Anything)
+}
+
 func TestSetterSuite(t *testing.T) {
 	suite.Run(t, new(SetterSuite))
 }
