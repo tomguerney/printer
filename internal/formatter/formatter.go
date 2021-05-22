@@ -20,23 +20,32 @@ func New(tabwriterOptions *domain.TabwriterOptions) *Formatter {
 	}
 }
 
-// Msg returns a string comprised of the passed text ending with a newline
-// The text may contain formatting verbs that will be formatted with
-// the passed operands
+// Msg returns the passed text appended with a newline. If the text contains
+// formatting verbs (e.g. %v), they will be formatted as per the
+// "...interface{}" variadic parameter in the fashion of fmt.Printf()
 func (f *Formatter) Msg(text string, a ...interface{}) string {
 	formatted := fmt.Sprintf("%s\n", text)
 	return fmt.Sprintf(formatted, a...)
 }
 
-// Error returns a string comprised of the passed text prefixed with "Error: " with a newline
-// The text may contain formatting verbs that will be formatted with
-// the passed operands
+// Error returns the passed text prefixed with "Error: " and appended with a
+// newline. If the text contains formatting verbs (e.g. %v), they will be
+// formatted as per the "...interface{}" variadic parameter in the fashion of
+// fmt.Printf()
 func (f *Formatter) Error(text string, a ...interface{}) string {
 	formatted := fmt.Sprintf("Error: %s\n", text)
 	return fmt.Sprintf(formatted, a...)
 }
 
-// Tabulate returns a formmatted table
+// Tabulate takes a 2D slice of rows and columns. The 2D slice is tabuled as per
+// the tabwriterOptions passed into the NewWriter function from the
+// "text/tabwriter" package from the Go standard library. The default
+// tabwriterOptions are set at the root printer package level. 
+//
+// Tabulate returns a one-dimensional slice of strings, with each element formed
+// from a row of strings from the original 2D slice. Each row is spaced such
+// that when the slice is printed row by row, the element in each row appear
+// vertically aligned in equally-spaced columns
 func (f *Formatter) Tabulate(rows [][]string) []string {
 
 	builder := strings.Builder{}

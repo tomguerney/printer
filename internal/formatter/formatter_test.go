@@ -27,8 +27,7 @@ func (suite *FormatterSuite) TestMessage() {
 	msg := "test message"
 	expected := "test message\n"
 	actual := suite.Formatter.Msg(msg)
-	suite.
-		Equal(expected, actual)
+	suite.Equal(expected, actual)
 }
 
 func (suite *FormatterSuite) TestMessageWithArgs() {
@@ -66,6 +65,22 @@ func (suite *FormatterSuite) TestTabulate() {
 		"The     first       row",
 		"This    is          another    row",
 		"The     tertiary    row",
+	}
+	actual := suite.Formatter.Tabulate(table)
+	suite.Equal(expected, actual)
+}
+
+func (suite *FormatterSuite) TestTabulateWithMorePadding() {
+	suite.Formatter.tabwriterOptions.Padding = 10
+	table := [][]string{
+		{"The", "first", "row"},
+		{"This", "is", "another", "row"},
+		{"The", "tertiary", "row"},
+	}
+	expected := []string{
+		"The           first             row",
+		"This          is                another          row",
+		"The           tertiary          row",
 	}
 	actual := suite.Formatter.Tabulate(table)
 	suite.Equal(expected, actual)
