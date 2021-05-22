@@ -68,38 +68,3 @@ func (f *Formatter) Tabulate(rows [][]string) []string {
 	return table[:len(table)-1]
 }
 
-func (f *Formatter) TabulateWithHeaders(rows [][]string) []string {
-	divRow := f.getDivRow(rows)
-	rowsWithHeader := append(rows[:2], rows[1:]...)
-	rowsWithHeader[1] = divRow
-	return f.Tabulate(rowsWithHeader)
-}
-
-func (f *Formatter) getDivRow(rows [][]string) []string {
-	colWidths := f.getColWidths(rows)
-	divRow := make([]string, len(colWidths))
-	for col, width := range colWidths {
-		divRow[col] = strings.Repeat("-", width)
-	}
-	return divRow
-}
-
-func (f *Formatter) getColWidths(
-	rows [][]string,
-) map[int]int {
-	maxCols := 0
-	for _, row := range rows {
-		if len(row) > maxCols {
-			maxCols = len(row)
-		}
-	}
-	widths := make(map[int]int, maxCols)
-	for _, row := range rows {
-		for col, elem := range row {
-			if len(elem) > widths[col] {
-				widths[col] = len(elem)
-			}
-		}
-	}
-	return widths
-}

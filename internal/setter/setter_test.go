@@ -77,6 +77,11 @@ func (m *MockStenciller) TableStencil(
 	return args.Get(0).([][]string), args.Error(1)
 }
 
+func (m *MockStenciller) PrefixHeaders(rows [][]string) [][]string {
+	args := m.Called(rows)
+	return args.Get(0).([][]string)
+}
+
 type SetterSuite struct {
 	suite.Suite
 	Setter     *Setter

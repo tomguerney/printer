@@ -115,8 +115,10 @@ func (s *Stenciller) TmplStencil(
 
 // TableStencil takes the ID of a Table Stencil and a slice of "row" maps with
 // string key/values. It returns an error if it can't find a Stencil with the
-// passed ID. It applies the Table Stencil to the row map slice and tabulates
-// and returns the result.
+// passed ID. It applies the Table Stencil to the row map slice to create a 2D
+// slice. If the Headers fields of the Stencil isn't empty, it will will prepend
+// the headers to the 2D slice with a dynamically-sized divider row before
+// returning the result.
 func (s *Stenciller) TableStencil(
 	id string,
 	rawDataRows []map[string]string,
@@ -125,7 +127,6 @@ func (s *Stenciller) TableStencil(
 	if err != nil {
 		return nil, err
 	}
-	colorSliceRows = append(colorSliceRows, stencil.Headers)
 	for _, rawDataRow := range rawDataRows {
 		colorDataRow := s.colorData(stencil.Colors, rawDataRow)
 		colorSliceRow := make([]string, 0, len(colorDataRow))
@@ -134,7 +135,20 @@ func (s *Stenciller) TableStencil(
 		}
 		colorSliceRows = append(colorSliceRows, colorSliceRow)
 	}
+	if len(stencil.Headers) > 0 {
+		colorSliceRows = s.prependHeaders(colorSliceRows, stencil.Headers)
+	}
 	return colorSliceRows, nil
+}
+
+func (s *Stenciller) prependHeaders(
+	rows [][]string,
+	headers []string,
+) [][]string {
+	rowsWithHeader := append(rows[:2], rows[0:]...)
+	rowsWithHeader[0] = headers
+	rowsWithHeader[1] = s.createDivRow(rows)
+	return rowsWithHeader
 }
 
 func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
@@ -192,4 +206,33 @@ func (s *Stenciller) interpolate(
 		return "", err
 	}
 	return builder.String(), nil
+}
+
+func (s *Stenciller) createDivRow(rows [][]string) []string {
+	colWidths := s.getColWidths(rows)
+	divRow := make([]string, len(colWidths))
+	for col, width := range colWidths {
+		divRow[col] = strings.Repeat("-", width)
+	}
+	return divRow
+}
+
+func (s *Stenciller) getColWidths(
+	rows [][]string,
+) map[int]int {
+	maxCols := 0
+	for _, row := range rows {
+		if len(row) > maxCols {
+			maxCols = len(row)
+		}
+	}
+	widths := make(map[int]int, maxCols)
+	for _, row := range rows {
+		for col, elem := range row {
+			if len(elem) > widths[col] {
+				widths[col] = len(elem)
+			}
+		}
+	}
+	return widths
 }
