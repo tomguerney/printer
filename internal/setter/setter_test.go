@@ -2,6 +2,7 @@ package setter
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -179,9 +180,9 @@ func (suite *SetterSuite) TestTabulate() {
 	}
 	suite.Formatter.On("Tabulate", table).Return(expected)
 	suite.Setter.Tabulate(table)
-	suite.Writer.AssertCalled(suite.T(), "Write", expected[0])
-	suite.Writer.AssertCalled(suite.T(), "Write", expected[1])
-	suite.Writer.AssertCalled(suite.T(), "Write", expected[2])
+	suite.Writer.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[0]))
+	suite.Writer.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[1]))
+	suite.Writer.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[2]))
 	suite.Writer.AssertNumberOfCalls(suite.T(), "Write", 3)
 }
 func (suite *SetterSuite) TestSTabulate() {
@@ -207,7 +208,7 @@ func (suite *SetterSuite) TestTmplStencil() {
 	suite.Stenciller.On("TmplStencil", id, data).Return(expected, nil)
 	err := suite.Setter.TmplStencil(id, data)
 	suite.NoError(err)
-	suite.Writer.AssertCalled(suite.T(), "Write", expected)
+	suite.Writer.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected))
 }
 
 func (suite *SetterSuite) TestTmplStencilWithError() {
@@ -250,7 +251,7 @@ func (suite *SetterSuite) TestTableStencil() {
 	suite.Formatter.On("Tabulate", mock.Anything).Return(tabulateResult)
 	err := suite.Setter.TableStencil(id, rows)
 	suite.NoError(err)
-	suite.Writer.AssertCalled(suite.T(), "Write", tabulateResult[0])
+	suite.Writer.AssertCalled(suite.T(), "Write", fmt.Sprintln(tabulateResult[0]))
 }
 
 func (suite *SetterSuite) TestTableStencilWithError() {

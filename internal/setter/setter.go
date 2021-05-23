@@ -70,7 +70,7 @@ func (s *Setter) SError(i interface{}, a ...interface{}) string {
 func (s *Setter) Tabulate(rows [][]string) {
 	tabulated := s.formatter.Tabulate(rows)
 	for _, row := range tabulated {
-		fmt.Fprint(s.Writer, row)
+		fmt.Fprintln(s.Writer, row)
 	}
 }
 
@@ -102,7 +102,7 @@ func (s *Setter) TmplStencil(id string, data map[string]string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(s.Writer, result)
+	fmt.Fprintln(s.Writer, result)
 	return nil
 }
 

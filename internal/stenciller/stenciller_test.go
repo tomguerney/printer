@@ -100,7 +100,7 @@ func (suite *StencillerSuite) TestTmplStencil() {
 	suite.Colorer.On("Color", "value", "red").Return("redValue", true)
 	actual, err := suite.Stenciller.TmplStencil(id, data)
 	suite.NoError(err)
-	expected := "redValue template\n"
+	expected := "redValue template"
 	suite.Equal(expected, actual)
 }
 

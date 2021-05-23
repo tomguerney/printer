@@ -110,7 +110,7 @@ func (s *Stenciller) TmplStencil(
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%v\n", interpolated), nil
+	return interpolated, nil
 }
 
 // TableStencil takes the ID of a Table Stencil and a slice of "row" maps with

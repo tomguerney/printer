@@ -95,9 +95,9 @@ func (suite *PrinterSuite) TestTabulate() {
 	}
 
 	expected := []string{
-		"The     first       row",
-		"This    is          another    row",
-		"The     tertiary    row",
+		"The     first       row\n",
+		"This    is          another    row\n",
+		"The     tertiary    row\n",
 	}
 	Tabulate(table)
 	suite.Writer.AssertCalled(suite.T(), "Write", expected[0])
@@ -133,7 +133,7 @@ func (suite *PrinterSuite) TestAddStencilWithExistingID() {
 	suite.Errorf(err, "Stencil with ID %v already exists")
 }
 
-func (suite *PrinterSuite) TestUseStencil() {
+func (suite *PrinterSuite) TestTmplStencil() {
 	id := "test-id"
 	template := "{{ .test }} template"
 	colors := map[string]string{
