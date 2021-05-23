@@ -49,6 +49,11 @@ func SError(i interface{}, a ...interface{}) string {
 	return s.SError(i, a...)
 }
 
+// Linefeed prints an empty line
+func Linefeed() {
+	s.Linefeed()
+}
+
 // Tabulate takes an array of string arrays and prints a table to output
 func Tabulate(rows [][]string) {
 	s.Tabulate(rows)

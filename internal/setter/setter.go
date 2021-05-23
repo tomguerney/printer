@@ -60,6 +60,11 @@ func (s *Setter) SError(i interface{}, a ...interface{}) string {
 	return s.formatter.Error(text, a...)
 }
 
+// Linefeed prints an empty line
+func (s *Setter) Linefeed() {
+	fmt.Fprintln(s.Writer)
+}
+
 // Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
 // per the tabwriterOptions passed into the domain.Formatter and the internal
 // logic of that package. The default tabwriterOptions are set at the root
