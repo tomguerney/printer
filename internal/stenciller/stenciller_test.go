@@ -414,7 +414,7 @@ func (suite *StencillerSuite) TestInterpolateWithNonExistantKey() {
 		"field2": "value2",
 	}
 	tmpl := "abc {{ .field2 }} def {{.Field3}}"
-	expected := "abc value2 def "
+	expected := "abc value2 def <no value>"
 	actual, err := suite.Stenciller.interpolate(tmpl, data)
 	suite.NoError(err)
 	suite.Equal(expected, actual)

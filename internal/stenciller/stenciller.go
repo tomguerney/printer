@@ -2,8 +2,8 @@ package stenciller
 
 import (
 	"fmt"
-	"html/template"
 	"strings"
+	"text/template"
 
 	"github.com/rs/zerolog/log"
 
@@ -17,7 +17,7 @@ import (
 // Stencils are either Template Stencils or Table Stencils.
 //
 // A Template Stencil is comprised of an ID, a "color" map of string key/value
-// pairs, and a template string as per the "html/template" package from the Go
+// pairs, and a template string as per the "text/template" package from the Go
 // standard library. When a Template Stencil is applied to a "data" map of
 // string key/value pairs, it finds any key in the map that matches a key in the
 // Template Stencil's color map and transforms the data value string to the
@@ -140,6 +140,7 @@ func (s *Stenciller) TableStencil(
 		for key, value := range colorDataRow {
 			col, err := s.indexOf(key, stencil.ColumnOrder)
 			if err != nil {
+				log.Info().Err(err)
 				continue
 			}
 			colorSliceRow[col] = value
