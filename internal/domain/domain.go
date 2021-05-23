@@ -11,7 +11,11 @@ type Formatter interface {
 // by predefined templates and colors
 type Stenciller interface {
 	AddTmplStencil(id, template string, colors map[string]string) error
-	AddTableStencil(id string, headers []string, colors map[string]string) error
+	AddTableStencil(
+		id string,
+		headers, columnOrder []string,
+		colors map[string]string,
+	) error
 	TmplStencil(id string, data map[string]string) (string, error)
 	TableStencil(id string, rows []map[string]string) ([][]string, error)
 }

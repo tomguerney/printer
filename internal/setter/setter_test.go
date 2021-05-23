@@ -55,10 +55,10 @@ func (m *MockStenciller) AddTmplStencil(
 
 func (m *MockStenciller) AddTableStencil(
 	id string,
-	headers []string,
+	headers, columnOrder []string,
 	colors map[string]string,
 ) error {
-	args := m.Called(id, colors)
+	args := m.Called(id, headers, columnOrder, colors)
 	return args.Error(0)
 }
 

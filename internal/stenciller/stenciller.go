@@ -44,9 +44,10 @@ type tmplStencil struct {
 }
 
 type tableStencil struct {
-	ID      string
-	Colors  map[string]string
-	Headers []string
+	ID          string
+	Colors      map[string]string
+	ColumnOrder []string
+	Headers     []string
 }
 
 // New returns a pointer to a new Stenciller struct
@@ -77,6 +78,7 @@ func (s *Stenciller) AddTmplStencil(
 func (s *Stenciller) AddTableStencil(
 	id string,
 	headers []string,
+	columnOrder []string,
 	colors map[string]string,
 ) error {
 	if id == "" {
@@ -89,7 +91,12 @@ func (s *Stenciller) AddTableStencil(
 	}
 	s.tableStencils = append(
 		s.tableStencils,
-		&tableStencil{ID: id, Headers: headers, Colors: colors})
+		&tableStencil{
+			ID:          id,
+			Headers:     headers,
+			Colors:      colors,
+			ColumnOrder: columnOrder,
+		})
 	return nil
 }
 
@@ -129,9 +136,13 @@ func (s *Stenciller) TableStencil(
 	}
 	for _, rawDataRow := range rawDataRows {
 		colorDataRow := s.colorData(stencil.Colors, rawDataRow)
-		colorSliceRow := make([]string, 0, len(colorDataRow))
-		for _, value := range colorDataRow {
-			colorSliceRow = append(colorSliceRow, value)
+		colorSliceRow := make([]string, len(stencil.ColumnOrder))
+		for key, value := range colorDataRow {
+			col, err := s.indexOf(key, stencil.ColumnOrder)
+			if err != nil {
+				continue
+			}
+			colorSliceRow[col] = value
 		}
 		colorSliceRows = append(colorSliceRows, colorSliceRow)
 	}
@@ -233,4 +244,13 @@ func (s *Stenciller) getColWidths(
 		}
 	}
 	return widths
+}
+
+func (s *Stenciller) indexOf(elem string, data []string) (int, error) {
+	for k, v := range data {
+		if elem == v {
+			return k, nil
+		}
+	}
+	return 0, fmt.Errorf("Unable to find index of element %v", elem)
 }

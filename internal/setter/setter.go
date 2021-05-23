@@ -167,8 +167,8 @@ func (s *Setter) AddTmplStencil(
 // colors.
 func (s *Setter) AddTableStencil(
 	id string,
-	headers []string,
+	headers, columnOrder []string,
 	colors map[string]string,
 ) error {
-	return s.stenciller.AddTableStencil(id, headers, colors)
+	return s.stenciller.AddTableStencil(id, headers, columnOrder, colors)
 }

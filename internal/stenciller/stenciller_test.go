@@ -64,7 +64,8 @@ func (suite *StencillerSuite) TestAddTableStencil() {
 		"test": "red",
 	}
 	headers := []string{"header1", "header2"}
-	err := suite.Stenciller.AddTableStencil(id, headers, colors)
+	columnOrder := []string{"key1", "key2"}
+	err := suite.Stenciller.AddTableStencil(id, headers, columnOrder, colors)
 	suite.NoError(err)
 	suite.Len(suite.Stenciller.tableStencils, 1)
 }
@@ -78,12 +79,12 @@ func (suite *StencillerSuite) TestAddTableStencilWithExistingID() {
 	suite.Stenciller.tableStencils =
 		append(suite.Stenciller.tableStencils, stencil)
 	suite.Len(suite.Stenciller.tableStencils, 1)
-	err := suite.Stenciller.AddTableStencil(stencil.ID, nil, nil)
+	err := suite.Stenciller.AddTableStencil(stencil.ID, nil, nil, nil)
 	suite.Errorf(err, "Table Stencil with ID test-id already exists")
 }
 
 func (suite *StencillerSuite) TestAddTableStencilWithEmptyID() {
-	err := suite.Stenciller.AddTableStencil("", nil, nil)
+	err := suite.Stenciller.AddTableStencil("", nil, nil, nil)
 	suite.Errorf(err, "Stencil ID may not be empty")
 }
 
@@ -109,7 +110,8 @@ func (suite *StencillerSuite) TestTableStencil() {
 	colors := map[string]string{
 		"key2": "red",
 	}
-	suite.Stenciller.AddTableStencil(id, nil, colors)
+	columnOrder := []string{"key1", "key2"}
+	suite.Stenciller.AddTableStencil(id, nil, columnOrder, colors)
 	data := []map[string]string{{
 		"key1": "value1a",
 		"key2": "value2a",
@@ -133,7 +135,8 @@ func (suite *StencillerSuite) TestTableStencilWithHeaders() {
 		"key2": "red",
 	}
 	headers := []string{"header1", "header2"}
-	suite.Stenciller.AddTableStencil(id, headers, colors)
+	columnOrder := []string{"key1", "key2"}
+	suite.Stenciller.AddTableStencil(id, headers, columnOrder, colors)
 	data := []map[string]string{{
 		"key1": "value1a",
 		"key2": "value2a",
@@ -153,13 +156,41 @@ func (suite *StencillerSuite) TestTableStencilWithHeaders() {
 	suite.Equal(expected, actual)
 }
 
+func (suite *StencillerSuite) TestTableStencilWithMoreHeadersThanDataCols() {
+	id := "test-id"
+	colors := map[string]string{
+		"key2": "red",
+	}
+	headers := []string{"header1", "header2", "header3"}
+	columnOrder := []string{"key1", "key2"}
+	suite.Stenciller.AddTableStencil(id, headers, columnOrder, colors)
+	data := []map[string]string{{
+		"key1": "value1a",
+		"key2": "value2a",
+	}, {
+		"key1": "value1b",
+		"key2": "value2b",
+	}}
+	expected := [][]string{
+		{"header1", "header2", "header3"},
+		{"-------", "--------", "-------"},
+		{"value1a", "redValue"},
+		{"value1b", "redValue"},
+	}
+	suite.Colorer.On("Color", mock.Anything, "red").Return("redValue", true)
+	actual, err := suite.Stenciller.TableStencil(id, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
 func (suite *StencillerSuite) TestTableStencilWithHeadersLongerThanItems() {
 	id := "test-id"
 	colors := map[string]string{
 		"key2": "red",
 	}
 	headers := []string{"header1", "header2IsQuiteLong"}
-	suite.Stenciller.AddTableStencil(id, headers, colors)
+	columnOrder := []string{"key1", "key2"}
+	suite.Stenciller.AddTableStencil(id, headers, columnOrder, colors)
 	data := []map[string]string{{
 		"key1": "value1a",
 		"key2": "value2a",
@@ -185,7 +216,8 @@ func (suite *StencillerSuite) TestTableStencilWithHeadersAndOneRow() {
 		"key2": "red",
 	}
 	headers := []string{"header1", "header2"}
-	suite.Stenciller.AddTableStencil(id, headers, colors)
+	columnOrder := []string{"key1", "key2"}
+	suite.Stenciller.AddTableStencil(id, headers, columnOrder, colors)
 	data := []map[string]string{{
 		"key1": "value1a",
 		"key2": "value2a",
@@ -194,6 +226,80 @@ func (suite *StencillerSuite) TestTableStencilWithHeadersAndOneRow() {
 		{"header1", "header2"},
 		{"-------", "--------"},
 		{"value1a", "redValue"},
+	}
+	suite.Colorer.On("Color", mock.Anything, "red").Return("redValue", true)
+	actual, err := suite.Stenciller.TableStencil(id, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
+func (suite *StencillerSuite) TestTableStencilWithOutOfOrderData() {
+	id := "test-id"
+	colors := map[string]string{
+		"key2": "red",
+	}
+	columnOrder := []string{"key1", "key2"}
+	suite.Stenciller.AddTableStencil(id, nil, columnOrder, colors)
+	data := []map[string]string{{
+		"key1": "value1a",
+		"key2": "value2a",
+	}, {
+		"key2": "value2b",
+		"key1": "value1b",
+	}}
+	expected := [][]string{
+		{"value1a", "redValue"},
+		{"value1b", "redValue"},
+	}
+	suite.Colorer.On("Color", mock.Anything, "red").Return("redValue", true)
+	actual, err := suite.Stenciller.TableStencil(id, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
+func (suite *StencillerSuite) TestTableStencilWithDataNotInColumnOrder() {
+	id := "test-id"
+	colors := map[string]string{
+		"key2": "red",
+	}
+	columnOrder := []string{"key1", "key2"}
+	suite.Stenciller.AddTableStencil(id, nil, columnOrder, colors)
+	data := []map[string]string{{
+		"key1": "value1a",
+		"key3": "this should not appear",
+		"key2": "value2a",
+	}, {
+		"key1": "value1b",
+		"key2": "value2b",
+	}}
+	expected := [][]string{
+		{"value1a", "redValue"},
+		{"value1b", "redValue"},
+	}
+	suite.Colorer.On("Color", mock.Anything, "red").Return("redValue", true)
+	actual, err := suite.Stenciller.TableStencil(id, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
+func (suite *StencillerSuite) TestTableStencilWithColumnOrderNotInData() {
+	id := "test-id"
+	colors := map[string]string{
+		"key2": "red",
+	}
+	columnOrder := []string{"key1", "notinsomedata", "key2"}
+	suite.Stenciller.AddTableStencil(id, nil, columnOrder, colors)
+	data := []map[string]string{{
+		"key1": "value1a",
+		"key2": "value2a",
+	}, {
+		"key1":          "value1b",
+		"notinsomedata": "anothervalue",
+		"key2":          "value2b",
+	}}
+	expected := [][]string{
+		{"value1a", "", "redValue"},
+		{"value1b", "anothervalue", "redValue"},
 	}
 	suite.Colorer.On("Color", mock.Anything, "red").Return("redValue", true)
 	actual, err := suite.Stenciller.TableStencil(id, data)

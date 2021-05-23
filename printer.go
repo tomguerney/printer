@@ -54,7 +54,8 @@ func Tabulate(rows [][]string) {
 	s.Tabulate(rows)
 }
 
-// STabulate takes an array of string arrays and return an array of formatted rows
+// STabulate takes an array of string arrays and return an array of formatted
+// rows
 func STabulate(rows [][]string) []string {
 	return s.STabulate(rows)
 }
@@ -64,22 +65,29 @@ func AddTmplStencil(id, template string, colors map[string]string) error {
 	return s.AddTmplStencil(id, template, colors)
 }
 
-// TmplStencil applies a string map to the stencil with the passed ID and prints it to output
+// TmplStencil applies a string map to the stencil with the passed ID and prints
+// it to output
 func TmplStencil(id string, data map[string]string) error {
 	return s.TmplStencil(id, data)
 }
 
-// STmplStencil applies a string map to the stencil with the passed ID and returns the result
+// STmplStencil applies a string map to the stencil with the passed ID and
+// returns the result
 func STmplStencil(id string, data map[string]string) (string, error) {
 	return s.STmplStencil(id, data)
 }
 
 // AddTableStencil adds a new table stencil
-func AddTableStencil(id string, headers []string, colors map[string]string) error {
-	return s.AddTableStencil(id, headers, colors)
+func AddTableStencil(
+	id string,
+	headers, columnOrder []string,
+	colors map[string]string,
+) error {
+	return s.AddTableStencil(id, headers, columnOrder, colors)
 }
 
-// TableStencil take an array of string maps and prints stencilled rows to output
+// TableStencil take an array of string maps and prints stencilled rows to
+// output
 func TableStencil(id string, rows []map[string]string) error {
 	return s.TableStencil(id, rows)
 }
