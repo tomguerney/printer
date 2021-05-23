@@ -153,6 +153,32 @@ func (suite *StencillerSuite) TestTableStencilWithHeaders() {
 	suite.Equal(expected, actual)
 }
 
+func (suite *StencillerSuite) TestTableStencilWithHeadersLongerThanItems() {
+	id := "test-id"
+	colors := map[string]string{
+		"key2": "red",
+	}
+	headers := []string{"header1", "header2IsQuiteLong"}
+	suite.Stenciller.AddTableStencil(id, headers, colors)
+	data := []map[string]string{{
+		"key1": "value1a",
+		"key2": "value2a",
+	}, {
+		"key1": "value1b",
+		"key2": "value2b",
+	}}
+	expected := [][]string{
+		{"header1", "header2IsQuiteLong"},
+		{"-------", "------------------"},
+		{"value1a", "redValue"},
+		{"value1b", "redValue"},
+	}
+	suite.Colorer.On("Color", mock.Anything, "red").Return("redValue", true)
+	actual, err := suite.Stenciller.TableStencil(id, data)
+	suite.NoError(err)
+	suite.Equal(expected, actual)
+}
+
 func (suite *StencillerSuite) TestTableStencilWithHeadersAndOneRow() {
 	id := "test-id"
 	colors := map[string]string{

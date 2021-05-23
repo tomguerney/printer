@@ -145,7 +145,7 @@ func (s *Stenciller) prependHeaders(
 	rows [][]string,
 	headers []string,
 ) [][]string {
-	rowsWithHeader := [][]string{headers, s.createDivRow(rows)}
+	rowsWithHeader := [][]string{headers, s.createDivRow(append(rows, headers))}
 	return append(rowsWithHeader, rows...)
 }
 
