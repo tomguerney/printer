@@ -146,7 +146,7 @@ func (suite *StencillerSuite) TestTableStencilWithHeaders() {
 	}}
 	expected := [][]string{
 		{"header1", "header2"},
-		{"-------", "--------"},
+		{"-------", "-------"},
 		{"value1a", "redValue"},
 		{"value1b", "redValue"},
 	}
@@ -173,7 +173,7 @@ func (suite *StencillerSuite) TestTableStencilWithMoreHeadersThanDataCols() {
 	}}
 	expected := [][]string{
 		{"header1", "header2", "header3"},
-		{"-------", "--------", "-------"},
+		{"-------", "-------", "-------"},
 		{"value1a", "redValue"},
 		{"value1b", "redValue"},
 	}
@@ -224,7 +224,7 @@ func (suite *StencillerSuite) TestTableStencilWithHeadersAndOneRow() {
 	}}
 	expected := [][]string{
 		{"header1", "header2"},
-		{"-------", "--------"},
+		{"-------", "-------"},
 		{"value1a", "redValue"},
 	}
 	suite.Colorer.On("Color", mock.Anything, "red").Return("redValue", true)
@@ -344,7 +344,7 @@ func (suite *StencillerSuite) TestColorData() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", true)
 	suite.Colorer.On("Color", "value2", "green").Return("greenValue", true)
-	actual := suite.Stenciller.colorData(stencil.Colors, data)
+	actual := suite.Stenciller.colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -368,7 +368,7 @@ func (suite *StencillerSuite) TestColorDataWithValueWithoutColorDefinition() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
 	suite.Colorer.On("Color", "value3", "green").Return("greenValue3", true)
-	actual := suite.Stenciller.colorData(stencil.Colors, data)
+	actual := suite.Stenciller.colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -392,7 +392,7 @@ func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
 	suite.Colorer.On("Color", "value3", "notacolor").Return("", false)
-	actual := suite.Stenciller.colorData(stencil.Colors, data)
+	actual := suite.Stenciller.colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -433,6 +433,29 @@ func (suite *StencillerSuite) TestInterpolateWithExtraMapKey() {
 	suite.Equal(expected, actual)
 }
 
+func (suite *StencillerSuite) TestGetRowSlices() {
+	headers := []string{"header1", "header2"}
+	columnOrder := []string{"key1", "key2"}
+	data := []map[string]string{{
+		"key1": "value1a",
+		"key2": "value2a",
+	}, {
+		"key2": "value2b",
+		"key1": "value1b",
+	}}
+	expected := [][]string{
+		{"header1", "header2"},
+		{"value1a", "value2a"},
+		{"value1b", "value2b"},
+	}
+	stencil := &tableStencil{
+		ColumnOrder: columnOrder,
+		Headers:     headers,
+	}
+	actual := suite.Stenciller.getRowSlices(data, stencil)
+	suite.Equal(expected, actual)
+
+}
 func TestStencillerSuite(t *testing.T) {
 	suite.Run(t, new(StencillerSuite))
 }

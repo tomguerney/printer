@@ -149,6 +149,38 @@ func (suite *PrinterSuite) TestTmplStencil() {
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
+func (suite *PrinterSuite) TestTableStencil() {
+	id := "test-id"
+	headers := []string{"Header1", "This is header 2", "h3"}
+	columnOrder := []string{"Key1", "Key3", "Key2"}
+	colors := map[string]string{"Key3": "green"}
+	AddTableStencil(id, headers, columnOrder, colors)
+	data := []map[string]string{
+		{
+			"Key1": "value1a",
+			"Key2": "This is value 2a",
+			"Key3": "v3a",
+		},
+		{
+			"Key1": "value1b",
+			"Key2": "value 2b",
+			"Key3": "v3b",
+		},
+	}
+	expected := []string{
+		"Header1    This is header 2    h3\n",
+		"-------    ----------------    ----------------\n",
+		"value1a    v3a                 This is value 2a\n",
+		"value1b    v3b                 value 2b\n",
+	}
+	TableStencil(id, data)
+	suite.Writer.AssertCalled(suite.T(), "Write", expected[0])
+	suite.Writer.AssertCalled(suite.T(), "Write", expected[1])
+	suite.Writer.AssertCalled(suite.T(), "Write", expected[2])
+	suite.Writer.AssertCalled(suite.T(), "Write", expected[3])
+	suite.Writer.AssertNumberOfCalls(suite.T(), "Write", 4)
+}
+
 func TestPrinterSuite(t *testing.T) {
 	suite.Run(t, new(PrinterSuite))
 }

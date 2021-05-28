@@ -96,3 +96,9 @@ func AddTableStencil(
 func TableStencil(id string, rows []map[string]string) error {
 	return s.TableStencil(id, rows)
 }
+
+// STableStencil take an array of string maps and returns the stencilled rows to
+// output
+func STableStencil(id string, rows []map[string]string) ([]string, error) {
+	return s.STableStencil(id, rows)
+}

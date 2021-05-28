@@ -25,12 +25,12 @@ import (
 // produce a single string.
 //
 // A Table Stencil is comprised of an ID, a "color" map of string key/value
-// pairs, and a "headers" string slice. When a Table Stencil is applied to a
-// slice of "row" maps of string key/value pairs, the Stenciller loops through
-// the rows, finding any key in the map that matches a key in the Stencil's
-// color map and transforms the data value string to the color of the color
-// value. It returns the rows and columns as a 2D string slice with a prefixed
-// header row.
+// pairs, a "headers" string slice, and a "column order" string slice. When a
+// Table Stencil is applied to a slice of "row" maps of string key/value pairs,
+// the Stenciller loops through the rows, finding any key in the map that
+// matches a key in the Stencil's color map and transforms the data value string
+// to the color of the color value. It returns the rows and columns as a 2D
+// string slice with a prefixed header row.
 type Stenciller struct {
 	tmplStencils  []*tmplStencil
 	tableStencils []*tableStencil
@@ -112,7 +112,7 @@ func (s *Stenciller) TmplStencil(
 	if err != nil {
 		return "", err
 	}
-	coloredData := s.colorData(stencil.Colors, data)
+	coloredData := s.colorMap(stencil.Colors, data)
 	interpolated, err := s.interpolate(stencil.Template, coloredData)
 	if err != nil {
 		return "", err
@@ -128,16 +128,19 @@ func (s *Stenciller) TmplStencil(
 // returning the result.
 func (s *Stenciller) TableStencil(
 	id string,
-	rawDataRows []map[string]string,
+	mapRows []map[string]string,
 ) (colorSliceRows [][]string, err error) {
 	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err
 	}
-	for _, rawDataRow := range rawDataRows {
-		colorDataRow := s.colorData(stencil.Colors, rawDataRow)
+	sliceRows := s.getRowSlices(mapRows, stencil)
+	colWidths := s.getColWidths(sliceRows)
+	divRow := s.createDivRow(colWidths)
+	for _, mapRow := range mapRows {
+		colorMapRow := s.colorMap(stencil.Colors, mapRow)
 		colorSliceRow := make([]string, len(stencil.ColumnOrder))
-		for key, value := range colorDataRow {
+		for key, value := range colorMapRow {
 			col, err := s.indexOf(key, stencil.ColumnOrder)
 			if err != nil {
 				log.Info().Err(err)
@@ -148,17 +151,31 @@ func (s *Stenciller) TableStencil(
 		colorSliceRows = append(colorSliceRows, colorSliceRow)
 	}
 	if len(stencil.Headers) > 0 {
-		colorSliceRows = s.prependHeaders(colorSliceRows, stencil.Headers)
+		headersWithDiv := [][]string{stencil.Headers, divRow}
+		colorSliceRows = append(headersWithDiv, colorSliceRows...)
 	}
 	return colorSliceRows, nil
 }
 
-func (s *Stenciller) prependHeaders(
-	rows [][]string,
-	headers []string,
-) [][]string {
-	rowsWithHeader := [][]string{headers, s.createDivRow(append(rows, headers))}
-	return append(rowsWithHeader, rows...)
+func (s *Stenciller) getRowSlices(
+	rowMaps []map[string]string,
+	stencil *tableStencil,
+) (rowSlices [][]string) {
+	for _, rowMap := range rowMaps {
+		rowSlice := make([]string, len(stencil.ColumnOrder))
+		for key, value := range rowMap {
+			col, err := s.indexOf(key, stencil.ColumnOrder)
+			if err != nil {
+				log.Info().Err(err)
+				continue
+			}
+			rowSlice[col] = value
+		}
+
+		rowSlices = append(rowSlices, rowSlice)
+
+	}
+	return append([][]string{stencil.Headers}, rowSlices...)
 }
 
 func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
@@ -179,7 +196,7 @@ func (s *Stenciller) findTableStencil(id string) (*tableStencil, error) {
 	return nil, fmt.Errorf("Unable to find table stencil with id of %v", id)
 }
 
-func (s *Stenciller) colorData(
+func (s *Stenciller) colorMap(
 	colors map[string]string,
 	data map[string]string,
 ) map[string]string {
@@ -218,8 +235,7 @@ func (s *Stenciller) interpolate(
 	return builder.String(), nil
 }
 
-func (s *Stenciller) createDivRow(rows [][]string) []string {
-	colWidths := s.getColWidths(rows)
+func (s *Stenciller) createDivRow(colWidths map[int]int) []string {
 	divRow := make([]string, len(colWidths))
 	for col, width := range colWidths {
 		divRow[col] = strings.Repeat("-", width)
