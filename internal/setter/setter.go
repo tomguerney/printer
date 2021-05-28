@@ -136,12 +136,19 @@ func (s *Setter) STmplStencil(
 // that matches a key in the Stencil's color map and transforms the data value
 // string to the color of the color value. It returns the rows and columns as a
 // 2D string slice with a prefixed header row.
-func (s *Setter) TableStencil(id string, rows []map[string]string) error {
-	result, err := s.stenciller.TableStencil(id, rows)
+func (s *Setter) TableStencil(id string, mapRows []map[string]string) error {
+	rows, err := s.stenciller.TableStencil(id, mapRows)
 	if err != nil {
 		return err
 	}
-	s.Tabulate(result)
+	tabulatedRows := s.STabulate(rows)
+	if headers, ok := s.stenciller.TableStencilHeaders(id, mapRows); ok {
+		tabulatedHeaders := s.STabulate(headers)
+		tabulatedRows = append(tabulatedHeaders, tabulatedRows...)
+	}
+	for _, row := range tabulatedRows {
+		fmt.Fprintln(s.Writer, row)
+	}
 	return nil
 }
 

@@ -78,6 +78,14 @@ func (m *MockStenciller) TableStencil(
 	return args.Get(0).([][]string), args.Error(1)
 }
 
+func (m *MockStenciller) TableStencilHeaders(
+	id string,
+	rows []map[string]string,
+) ([][]string, bool) {
+	args := m.Called(id, rows)
+	return args.Get(0).([][]string), args.Bool(1)
+}
+
 func (m *MockStenciller) PrefixHeaders(rows [][]string) [][]string {
 	args := m.Called(rows)
 	return args.Get(0).([][]string)

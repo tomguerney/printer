@@ -134,9 +134,6 @@ func (s *Stenciller) TableStencil(
 	if err != nil {
 		return nil, err
 	}
-	sliceRows := s.getRowSlices(mapRows, stencil)
-	colWidths := s.getColWidths(sliceRows)
-	divRow := s.createDivRow(colWidths)
 	for _, mapRow := range mapRows {
 		colorMapRow := s.colorMap(stencil.Colors, mapRow)
 		colorSliceRow := make([]string, len(stencil.ColumnOrder))
@@ -150,11 +147,26 @@ func (s *Stenciller) TableStencil(
 		}
 		colorSliceRows = append(colorSliceRows, colorSliceRow)
 	}
-	if len(stencil.Headers) > 0 {
-		headersWithDiv := [][]string{stencil.Headers, divRow}
-		colorSliceRows = append(headersWithDiv, colorSliceRows...)
-	}
 	return colorSliceRows, nil
+}
+
+// TableStencilHeaders does...
+func (s *Stenciller) TableStencilHeaders(
+	id string,
+	mapRows []map[string]string,
+) (headersWithDiv [][]string, ok bool) {
+	stencil, err := s.findTableStencil(id)
+	if err != nil {
+		log.Info().Err(err)
+		return nil, false
+	}
+	if len(stencil.Headers) == 0 {
+		return nil, false
+	}
+	sliceRows := s.getRowSlices(mapRows, stencil)
+	colWidths := s.getColWidths(sliceRows)
+	divRow := s.createDivRow(colWidths)
+	return [][]string{stencil.Headers, divRow}, true
 }
 
 func (s *Stenciller) getRowSlices(
