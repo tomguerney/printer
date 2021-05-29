@@ -18,7 +18,6 @@ type Stenciller interface {
 	) error
 	TmplStencil(id string, data map[string]string) (string, error)
 	TableStencil(id string, rows []map[string]string) ([][]string, error)
-	TableStencilHeaders(id string, mapRows []map[string]string) (headersWithDiv [][]string, ok bool)
 }
 
 // Colorer colors text

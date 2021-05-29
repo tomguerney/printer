@@ -48,6 +48,10 @@ func (f *Formatter) Error(text string, a ...interface{}) string {
 // vertically aligned in equally-spaced columns
 func (f *Formatter) Tabulate(rows [][]string) []string {
 
+
+	// find the max number of unprintable characters in each column
+	// append unprintable characters so that each line has the same extra padding
+
 	builder := strings.Builder{}
 	writer := tabwriter.NewWriter(
 		&builder,

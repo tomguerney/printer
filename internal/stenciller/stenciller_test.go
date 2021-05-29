@@ -452,7 +452,7 @@ func (suite *StencillerSuite) TestGetRowSlices() {
 		ColumnOrder: columnOrder,
 		Headers:     headers,
 	}
-	actual := suite.Stenciller.getRowSlices(data, stencil)
+	actual := suite.Stenciller.getSliceRows(data, stencil)
 	suite.Equal(expected, actual)
 
 }

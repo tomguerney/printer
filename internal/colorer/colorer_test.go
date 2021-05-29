@@ -2,9 +2,20 @@ package colorer
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
-func TestCorrectColorNames(t *testing.T) {
+type ColorerSuite struct {
+	suite.Suite
+	Colorer *Colorer
+}
+
+func (suite *ColorerSuite) SetupTest() {
+	suite.Colorer = &Colorer{}
+}
+
+func (suite *ColorerSuite) TestCorrectColorNames() {
 	c := Colorer{}
 	const text = "text"
 	var colorTests = []struct {
@@ -20,19 +31,23 @@ func TestCorrectColorNames(t *testing.T) {
 		{"white"},
 	}
 	for _, tt := range colorTests {
-		t.Run(tt.color, func(t *testing.T) {
+		suite.Run(tt.color, func() {
 			_, ok := c.Color(text, tt.color)
 			if !ok {
-				t.Fatalf("Colorize failed with color %v", tt.color)
+				suite.T().Fatalf("Colorize failed with color %v", tt.color)
 			}
 		})
 	}
 }
 
-func TestIncorrectColorName(t *testing.T) {
+func (suite *ColorerSuite) TestIncorrectColorName() {
 	c := Colorer{}
 	_, ok := c.Color("not a color", "text")
 	if ok {
-		t.Fatal("\"not a color\" should not return ok")
+		suite.T().Fatal("\"not a color\" should not return ok")
 	}
+}
+
+func TestColorerSuite(t *testing.T) {
+	suite.Run(t, new(ColorerSuite))
 }

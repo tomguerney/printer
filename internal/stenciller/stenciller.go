@@ -147,29 +147,26 @@ func (s *Stenciller) TableStencil(
 		}
 		colorSliceRows = append(colorSliceRows, colorSliceRow)
 	}
+	if headerRows, ok := s.createHeaderRows(stencil, mapRows); ok {
+		colorSliceRows = append(headerRows, colorSliceRows...)
+	}
 	return colorSliceRows, nil
 }
 
-// TableStencilHeaders does...
-func (s *Stenciller) TableStencilHeaders(
-	id string,
+func (s *Stenciller) createHeaderRows(
+	stencil *tableStencil,
 	mapRows []map[string]string,
 ) (headersWithDiv [][]string, ok bool) {
-	stencil, err := s.findTableStencil(id)
-	if err != nil {
-		log.Info().Err(err)
-		return nil, false
-	}
 	if len(stencil.Headers) == 0 {
 		return nil, false
 	}
-	sliceRows := s.getRowSlices(mapRows, stencil)
+	sliceRows := s.getSliceRows(mapRows, stencil)
 	colWidths := s.getColWidths(sliceRows)
 	divRow := s.createDivRow(colWidths)
 	return [][]string{stencil.Headers, divRow}, true
 }
 
-func (s *Stenciller) getRowSlices(
+func (s *Stenciller) getSliceRows(
 	rowMaps []map[string]string,
 	stencil *tableStencil,
 ) (rowSlices [][]string) {
