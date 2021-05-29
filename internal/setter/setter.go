@@ -73,7 +73,7 @@ func (s *Setter) Linefeed() {
 // Tabulate prints each row from the original 2D slice spaced such that each
 // element in each row appear vertically aligned in equally-spaced columns.
 func (s *Setter) Tabulate(rows [][]string) {
-	tabulated := s.formatter.Tabulate(rows)
+	tabulated := s.formatter.Tabulate(nil, rows)
 	for _, row := range tabulated {
 		fmt.Fprintln(s.Writer, row)
 	}
@@ -89,7 +89,7 @@ func (s *Setter) Tabulate(rows [][]string) {
 // such that when the slice is printed row by row, the element in each row
 // appear vertically aligned in equally-spaced columns
 func (s *Setter) STabulate(rows [][]string) []string {
-	return s.formatter.Tabulate(rows)
+	return s.formatter.Tabulate(nil, rows)
 }
 
 // TmplStencil takes the ID of a Template Stencil and a "data" map with string

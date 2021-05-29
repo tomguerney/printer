@@ -4,7 +4,7 @@ package domain
 type Formatter interface {
 	Msg(string, ...interface{}) string
 	Error(string, ...interface{}) string
-	Tabulate([][]string) []string
+	Tabulate(headers []string, rows [][]string) []string
 }
 
 // Stenciller takes maps and creates strings from their values defined
@@ -29,5 +29,4 @@ type Colorer interface {
 type TabwriterOptions struct {
 	Minwidth, Tabwidth, Padding int
 	Padchar                     byte
-	Flags                       uint
 }

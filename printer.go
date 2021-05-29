@@ -14,7 +14,6 @@ var TabwriterOptions = &domain.TabwriterOptions{
 	Tabwidth: 8,
 	Padding:  4,
 	Padchar:  ' ',
-	Flags:    0,
 }
 
 var s = setter.New(TabwriterOptions)

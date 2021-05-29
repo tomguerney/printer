@@ -34,8 +34,8 @@ func (m *MockFormatter) Error(text string, a ...interface{}) string {
 	return args.String(0)
 }
 
-func (m *MockFormatter) Tabulate(table [][]string) []string {
-	args := m.Called(table)
+func (m *MockFormatter) Tabulate(headers []string, table [][]string) []string {
+	args := m.Called(headers, table)
 	return args.Get(0).([]string)
 }
 

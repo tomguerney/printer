@@ -18,7 +18,6 @@ func (suite *FormatterSuite) SetupTest() {
 		Tabwidth: 8,
 		Padding:  4,
 		Padchar:  ' ',
-		Flags:    0,
 	}
 	suite.Formatter = &Formatter{tabwriterOptions}
 }
@@ -66,7 +65,7 @@ func (suite *FormatterSuite) TestTabulate() {
 		"This    is          another    row",
 		"The     tertiary    row",
 	}
-	actual := suite.Formatter.Tabulate(table)
+	actual := suite.Formatter.Tabulate(nil, table)
 	suite.Equal(expected, actual)
 }
 
@@ -82,7 +81,7 @@ func (suite *FormatterSuite) TestTabulateWithMorePadding() {
 		"This          is                another          row",
 		"The           tertiary          row",
 	}
-	actual := suite.Formatter.Tabulate(table)
+	actual := suite.Formatter.Tabulate(nil, table)
 	suite.Equal(expected, actual)
 }
 

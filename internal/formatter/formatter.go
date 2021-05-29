@@ -3,7 +3,6 @@ package formatter
 import (
 	"fmt"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/tomguerney/printer/internal/domain"
 )
@@ -46,29 +45,74 @@ func (f *Formatter) Error(text string, a ...interface{}) string {
 // from a row of strings from the original 2D slice. Each row is spaced such
 // that when the slice is printed row by row, the element in each row appear
 // vertically aligned in equally-spaced columns
-func (f *Formatter) Tabulate(rows [][]string) []string {
+func (f *Formatter) Tabulate(headers []string, rows [][]string) []string {
 
+	widths := f.getColWidths(append(rows, headers), f.tabwriterOptions.Minwidth)
 
-	// find the max number of unprintable characters in each column
-	// append unprintable characters so that each line has the same extra padding
-
-	builder := strings.Builder{}
-	writer := tabwriter.NewWriter(
-		&builder,
-		f.tabwriterOptions.Minwidth,
-		f.tabwriterOptions.Tabwidth,
-		f.tabwriterOptions.Padding,
-		f.tabwriterOptions.Padchar,
-		f.tabwriterOptions.Flags,
-	)
-
-	for _, row := range rows {
-		fmt.Fprintln(writer, fmt.Sprintf("%s", strings.Join(row, "\t")))
+	if headers != nil && len(headers) < 0 {
+		divRow := f.createDivRow(widths, f.tabwriterOptions.Minwidth)
+		headerRows := [][]string{headers, divRow}
+		rows = append(headerRows, rows...)
 	}
 
-	writer.Flush()
-	table := strings.Split(builder.String(), "\n")
+	spacedRows := f.spaceCols(
+		rows,
+		widths,
+		f.tabwriterOptions.Padding,
+		f.tabwriterOptions.Padchar,
+	)
 
-	return table[:len(table)-1]
+	strRows := make([]string, len(rows))
+
+	for i, row := range spacedRows {
+		strRows[i] = fmt.Sprintf("%s\n", strings.Join(row, ""))
+	}
+	return strRows
 }
 
+func (f *Formatter) getColWidths(
+	rows [][]string, minWidth int,
+) map[int]int {
+	widths := make(map[int]int)
+	for _, row := range rows {
+		for col, elem := range row {
+			if _, ok := widths[col]; !ok {
+				widths[col] = minWidth
+			}
+			if len(elem) > widths[col] {
+				widths[col] = len(elem)
+			}
+		}
+	}
+	return widths
+}
+
+func (f *Formatter) spaceCols(
+	rows [][]string,
+	widths map[int]int,
+	padding int,
+	paddingChar byte,
+) [][]string {
+	for _, row := range rows {
+		for col, val := range row {
+			diff := 0
+			if l := len(val); l < widths[col] {
+				diff = widths[col] - l
+			}
+			row[col] = val + strings.Repeat(string(paddingChar), diff+padding)
+		}
+	}
+	return rows
+}
+
+func (f *Formatter) createDivRow(colWidths map[int]int, minWidth int) []string {
+	divRow := make([]string, len(colWidths))
+	for col, width := range colWidths {
+		if width < minWidth {
+			divRow[col] = strings.Repeat("-", minWidth)
+		} else {
+			divRow[col] = strings.Repeat("-", width)
+		}
+	}
+	return divRow
+}
