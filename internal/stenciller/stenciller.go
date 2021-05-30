@@ -116,20 +116,20 @@ func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, err
 // slice. If the Headers fields of the Stencil isn't empty, it will will prepend
 // the headers to the 2D slice with a dynamically-sized divider row before
 // returning the result.
-func (s *Stenciller) TableStencil(id string, dataMaps []map[string]string) (tableSlices [][]string, err error) {
+func (s *Stenciller) TableStencil(id string, data []map[string]string) (coloredSlices [][]string, err error) {
 	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err
 	}
-	for _, m := range dataMaps {
-		mColored := s.colorMap(stencil.Colors, m)
-		sColored := mapToSliceInColumnOrder(mColored, stencil.ColumnOrder)
-		tableSlices = append(tableSlices, sColored)
+	for _, d := range data {
+		coloredData := s.colorMap(stencil.Colors, d)
+		coloredSlice := mapToSliceInColumnOrder(coloredData, stencil.ColumnOrder)
+		coloredSlices = append(coloredSlices, coloredSlice)
 	}
-	if headerSlices, ok := createHeaderSlices(stencil, dataMaps); ok {
-		tableSlices = append(headerSlices, tableSlices...)
+	if headerSlices, ok := createHeaderSlices(stencil, data); ok {
+		coloredSlices = append(headerSlices, coloredSlices...)
 	}
-	return tableSlices, nil
+	return coloredSlices, nil
 
 }
 

@@ -43,6 +43,11 @@ func New() *Printer {
 	}
 }
 
+// GetPrinter returns the singleton Prtiner
+func GetPrinter() *Printer {
+	return singleton
+}
+
 var singleton = New()
 
 // Out prints the passed text appended with a newline to the Writer. If the text
