@@ -434,29 +434,29 @@ func (suite *StencillerSuite) TestInterpolateWithExtraMapKey() {
 	suite.Equal(expected, actual)
 }
 
-func (suite *StencillerSuite) TestGetRowSlices() {
-	headers := []string{"header1", "header2"}
-	columnOrder := []string{"key1", "key2"}
-	data := []map[string]string{{
-		"key1": "value1a",
-		"key2": "value2a",
-	}, {
-		"key2": "value2b",
-		"key1": "value1b",
-	}}
-	expected := [][]string{
-		{"header1", "header2"},
-		{"value1a", "value2a"},
-		{"value1b", "value2b"},
-	}
-	stencil := &tableStencil{
-		ColumnOrder: columnOrder,
-		Headers:     headers,
-	}
-	actual := getSliceRows(data, stencil)
-	suite.Equal(expected, actual)
+// func (suite *StencillerSuite) TestGetRowSlices() {
+// 	headers := []string{"header1", "header2"}
+// 	columnOrder := []string{"key1", "key2"}
+// 	data := []map[string]string{{
+// 		"key1": "value1a",
+// 		"key2": "value2a",
+// 	}, {
+// 		"key2": "value2b",
+// 		"key1": "value1b",
+// 	}}
+// 	expected := [][]string{
+// 		{"header1", "header2"},
+// 		{"value1a", "value2a"},
+// 		{"value1b", "value2b"},
+// 	}
+// 	stencil := &tableStencil{
+// 		ColumnOrder: columnOrder,
+// 		Headers:     headers,
+// 	}
+// 	actual := getSliceRows(data, stencil)
+// 	suite.Equal(expected, actual)
 
-}
+// }
 func TestStencillerSuite(t *testing.T) {
 	suite.Run(t, new(StencillerSuite))
 }

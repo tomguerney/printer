@@ -143,32 +143,18 @@ func mapToSliceInColumnOrder(mapRow map[string]string, columnOrder []string) []s
 	return sliceRow
 }
 
-func createHeaderSlices(stencil *tableStencil, mapRows []map[string]string) (headersWithDiv [][]string, ok bool) {
+func createHeaderSlices(stencil *tableStencil, dataMaps []map[string]string) (headersWithDiv [][]string, ok bool) {
 	if len(stencil.Headers) == 0 {
 		return nil, false
 	}
-	sliceRows := getSliceRows(mapRows, stencil)
-	colWidths := getColWidths(sliceRows)
+	dataSlices := [][]string{}
+	for _, m := range dataMaps {
+		dataSlices = append(dataSlices, mapToSliceInColumnOrder(m, stencil.ColumnOrder))
+	}
+	dataSlices = append([][]string{stencil.Headers}, dataSlices...)
+	colWidths := getColWidths(dataSlices)
 	divRow := createDivRow(colWidths)
 	return [][]string{stencil.Headers, divRow}, true
-}
-
-func getSliceRows(rowMaps []map[string]string, stencil *tableStencil) (rowSlices [][]string) {
-	for _, rowMap := range rowMaps {
-		rowSlice := make([]string, len(stencil.ColumnOrder))
-		for key, value := range rowMap {
-			col, err := indexOf(key, stencil.ColumnOrder)
-			if err != nil {
-				log.Info().Err(err)
-				continue
-			}
-			rowSlice[col] = value
-		}
-
-		rowSlices = append(rowSlices, rowSlice)
-
-	}
-	return append([][]string{stencil.Headers}, rowSlices...)
 }
 
 func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
