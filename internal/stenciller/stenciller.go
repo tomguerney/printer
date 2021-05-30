@@ -114,31 +114,36 @@ func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, err
 // slice. If the Headers fields of the Stencil isn't empty, it will will prepend
 // the headers to the 2D slice with a dynamically-sized divider row before
 // returning the result.
-func (s *Stenciller) TableStencil(id string, mapRows []map[string]string) (colorSliceRows [][]string, err error) {
+func (s *Stenciller) TableStencil(id string, dataMaps []map[string]string) (coloredSlices [][]string, err error) {
 	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err
 	}
-	for _, mapRow := range mapRows {
-		colorMapRow := colorMap(stencil.Colors, mapRow)
-		colorSliceRow := make([]string, len(stencil.ColumnOrder))
-		for key, value := range colorMapRow {
-			col, err := indexOf(key, stencil.ColumnOrder)
-			if err != nil {
-				log.Info().Err(err)
-				continue
-			}
-			colorSliceRow[col] = value
-		}
-		colorSliceRows = append(colorSliceRows, colorSliceRow)
+	for _, m := range dataMaps {
+		mColored := colorMap(stencil.Colors, m)
+		sColored := mapToSliceInColumnOrder(mColored, stencil.ColumnOrder)
+		coloredSlices = append(coloredSlices, sColored)
 	}
-	if headerRows, ok := createHeaderRows(stencil, mapRows); ok {
-		colorSliceRows = append(headerRows, colorSliceRows...)
+	if headerSlices, ok := createHeaderSlices(stencil, dataMaps); ok {
+		coloredSlices = append(headerSlices, coloredSlices...)
 	}
-	return colorSliceRows, nil
+	return coloredSlices, nil
 }
 
-func createHeaderRows(stencil *tableStencil, mapRows []map[string]string) (headersWithDiv [][]string, ok bool) {
+func mapToSliceInColumnOrder(mapRow map[string]string, columnOrder []string) []string {
+	sliceRow := make([]string, len(columnOrder))
+	for key, value := range mapRow {
+		col, err := indexOf(key, columnOrder)
+		if err != nil {
+			log.Info().Err(err)
+			continue
+		}
+		sliceRow[col] = value
+	}
+	return sliceRow
+}
+
+func createHeaderSlices(stencil *tableStencil, mapRows []map[string]string) (headersWithDiv [][]string, ok bool) {
 	if len(stencil.Headers) == 0 {
 		return nil, false
 	}
