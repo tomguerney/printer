@@ -25,7 +25,12 @@ func New(tabwriterOptions *domain.TabwriterOptions) *Formatter {
 // "...interface{}" variadic parameter in the fashion of fmt.Printf()
 func (f *Formatter) Msg(text string, a ...interface{}) string {
 	formatted := fmt.Sprintf("%s\n", text)
-	return fmt.Sprintf(formatted, a...)
+	if len(a) > 0 {
+		return fmt.Sprintf(formatted, a...)
+	} else {
+		return fmt.Sprint(formatted)
+	}
+
 }
 
 // Error returns the passed text prefixed with "Error: " and appended with a
@@ -34,7 +39,11 @@ func (f *Formatter) Msg(text string, a ...interface{}) string {
 // fmt.Printf()
 func (f *Formatter) Error(text string, a ...interface{}) string {
 	formatted := fmt.Sprintf("Error: %s\n", text)
-	return fmt.Sprintf(formatted, a...)
+	if len(a) > 0 {
+		return fmt.Sprintf(formatted, a...)
+	} else {
+		return fmt.Sprint(formatted)
+	}
 }
 
 // Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
@@ -48,15 +57,15 @@ func (f *Formatter) Error(text string, a ...interface{}) string {
 // vertically aligned in equally-spaced columns
 func (f *Formatter) Tabulate(headers []string, rows [][]string) []string {
 
-	widths := f.getColWidths(append(rows, headers), f.tabwriterOptions.Minwidth)
+	widths := getColWidths(append(rows, headers), f.tabwriterOptions.Minwidth)
 
 	if headers != nil && len(headers) < 0 {
-		divRow := f.createDivRow(widths, f.tabwriterOptions.Minwidth)
+		divRow := createDivRow(widths, f.tabwriterOptions.Minwidth)
 		headerRows := [][]string{headers, divRow}
 		rows = append(headerRows, rows...)
 	}
 
-	spacedRows := f.spaceCols(
+	spacedRows := spaceCols(
 		rows,
 		widths,
 		f.tabwriterOptions.Padding,
@@ -71,9 +80,7 @@ func (f *Formatter) Tabulate(headers []string, rows [][]string) []string {
 	return strRows
 }
 
-func (f *Formatter) getColWidths(
-	rows [][]string, minWidth int,
-) map[int]int {
+func getColWidths(rows [][]string, minWidth int) map[int]int {
 	widths := make(map[int]int)
 	for _, row := range rows {
 		for col, elem := range row {
@@ -94,12 +101,7 @@ func lenNoAnsi(str string) int {
 	return len(re.ReplaceAllString(str, ""))
 }
 
-func (f *Formatter) spaceCols(
-	rows [][]string,
-	widths map[int]int,
-	padding int,
-	paddingChar byte,
-) [][]string {
+func spaceCols(rows [][]string, widths map[int]int, padding int, paddingChar byte) [][]string {
 	for _, row := range rows {
 		for col, val := range row {
 			diff := 0
@@ -115,7 +117,7 @@ func (f *Formatter) spaceCols(
 	return rows
 }
 
-func (f *Formatter) createDivRow(colWidths map[int]int, minWidth int) []string {
+func createDivRow(colWidths map[int]int, minWidth int) []string {
 	divRow := make([]string, len(colWidths))
 	for col, width := range colWidths {
 		if width < minWidth {

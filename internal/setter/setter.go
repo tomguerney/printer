@@ -149,10 +149,7 @@ func (s *Setter) TableStencil(id string, rows []map[string]string) error {
 // string key/values. It returns an error if it can't find a Stencil with the
 // passed ID. It applies the Table Stencil to the map slice and tabulates and
 // returns the result.
-func (s *Setter) STableStencil(
-	id string,
-	rows []map[string]string,
-) ([]string, error) {
+func (s *Setter) STableStencil(id string, rows []map[string]string) ([]string, error) {
 	result, err := s.stenciller.TableStencil(id, rows)
 	if err != nil {
 		return nil, err
@@ -161,19 +158,12 @@ func (s *Setter) STableStencil(
 }
 
 // AddTmplStencil adds a new Template Stencil with the passed ID and colors.
-func (s *Setter) AddTmplStencil(
-	id, template string,
-	colors map[string]string,
-) error {
+func (s *Setter) AddTmplStencil(id, template string, colors map[string]string) error {
 	return s.stenciller.AddTmplStencil(id, template, colors)
 }
 
 // AddTableStencil adds a new table Stencil with the passed ID, headers, and
 // colors.
-func (s *Setter) AddTableStencil(
-	id string,
-	headers, columnOrder []string,
-	colors map[string]string,
-) error {
+func (s *Setter) AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
 	return s.stenciller.AddTableStencil(id, headers, columnOrder, colors)
 }

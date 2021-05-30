@@ -82,11 +82,7 @@ func STmplStencil(id string, data map[string]string) (string, error) {
 }
 
 // AddTableStencil adds a new table stencil
-func AddTableStencil(
-	id string,
-	headers, columnOrder []string,
-	colors map[string]string,
-) error {
+func AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
 	return s.AddTableStencil(id, headers, columnOrder, colors)
 }
 

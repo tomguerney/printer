@@ -58,10 +58,7 @@ func New() *Stenciller {
 }
 
 // AddTmplStencil adds a new Template Stencil
-func (s *Stenciller) AddTmplStencil(
-	id, template string,
-	colors map[string]string,
-) error {
+func (s *Stenciller) AddTmplStencil(id, template string, colors map[string]string) error {
 	if id == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
@@ -75,12 +72,7 @@ func (s *Stenciller) AddTmplStencil(
 }
 
 // AddTableStencil adds a new Table Stencil
-func (s *Stenciller) AddTableStencil(
-	id string,
-	headers []string,
-	columnOrder []string,
-	colors map[string]string,
-) error {
+func (s *Stenciller) AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
 	if id == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
@@ -104,10 +96,7 @@ func (s *Stenciller) AddTableStencil(
 // key/value pairs. It returns an error if it can't find a Stencil with the
 // passed ID or template interpolation fails. It applies the Template Stencil to
 // the data map and returns the result.
-func (s *Stenciller) TmplStencil(
-	id string,
-	data map[string]string,
-) (string, error) {
+func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, error) {
 	stencil, err := s.findTmplStencil(id)
 	if err != nil {
 		return "", err
@@ -126,10 +115,7 @@ func (s *Stenciller) TmplStencil(
 // slice. If the Headers fields of the Stencil isn't empty, it will will prepend
 // the headers to the 2D slice with a dynamically-sized divider row before
 // returning the result.
-func (s *Stenciller) TableStencil(
-	id string,
-	mapRows []map[string]string,
-) (colorSliceRows [][]string, err error) {
+func (s *Stenciller) TableStencil(id string, mapRows []map[string]string) (colorSliceRows [][]string, err error) {
 	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err

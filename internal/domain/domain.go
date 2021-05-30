@@ -7,15 +7,11 @@ type Formatter interface {
 	Tabulate(headers []string, rows [][]string) []string
 }
 
-// Stenciller takes maps and creates strings from their values defined
-// by predefined templates and colors
+// Stenciller takes maps and creates strings from their values defined by
+// predefined templates and colors
 type Stenciller interface {
 	AddTmplStencil(id, template string, colors map[string]string) error
-	AddTableStencil(
-		id string,
-		headers, columnOrder []string,
-		colors map[string]string,
-	) error
+	AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error
 	TmplStencil(id string, data map[string]string) (string, error)
 	TableStencil(id string, rows []map[string]string) ([][]string, error)
 }
