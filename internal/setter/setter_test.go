@@ -186,7 +186,7 @@ func (suite *SetterSuite) TestTabulate() {
 		"row2",
 		"row3",
 	}
-	suite.Formatter.On("Tabulate", table).Return(expected)
+	suite.Formatter.On("Tabulate", mock.Anything, table).Return(expected)
 	suite.Setter.Tabulate(table)
 	suite.Writer.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[0]))
 	suite.Writer.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[1]))
@@ -204,7 +204,7 @@ func (suite *SetterSuite) TestSTabulate() {
 		"row2",
 		"row3",
 	}
-	suite.Formatter.On("Tabulate", table).Return(expected)
+	suite.Formatter.On("Tabulate", mock.Anything, table).Return(expected)
 	actual := suite.Setter.STabulate(table)
 	suite.Equal(expected, actual)
 }
@@ -256,7 +256,7 @@ func (suite *SetterSuite) TestTableStencil() {
 	tabulateResult := []string{"row1", "row2"}
 	suite.Stenciller.On("TableStencil", id, rows).
 		Return(tableStencilResult, nil)
-	suite.Formatter.On("Tabulate", mock.Anything).Return(tabulateResult)
+	suite.Formatter.On("Tabulate", mock.Anything, mock.Anything).Return(tabulateResult)
 	err := suite.Setter.TableStencil(id, rows)
 	suite.NoError(err)
 	suite.Writer.AssertCalled(suite.T(), "Write", fmt.Sprintln(tabulateResult[0]))
@@ -280,7 +280,7 @@ func (suite *SetterSuite) TestSTableStencil() {
 	expected := []string{"row1", "row2"}
 	suite.Stenciller.On("TableStencil", id, rows).
 		Return(tableStencilResult, nil)
-	suite.Formatter.On("Tabulate", mock.Anything).Return(expected)
+	suite.Formatter.On("Tabulate", mock.Anything, mock.Anything).Return(expected)
 	actual, err := suite.Setter.STableStencil(id, rows)
 	suite.NoError(err)
 	suite.Equal(expected, actual)

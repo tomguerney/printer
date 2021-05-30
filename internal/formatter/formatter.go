@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/tomguerney/printer/internal/domain"
@@ -65,7 +66,7 @@ func (f *Formatter) Tabulate(headers []string, rows [][]string) []string {
 	strRows := make([]string, len(rows))
 
 	for i, row := range spacedRows {
-		strRows[i] = fmt.Sprintf("%s\n", strings.Join(row, ""))
+		strRows[i] = strings.Join(row, "")
 	}
 	return strRows
 }
@@ -79,12 +80,18 @@ func (f *Formatter) getColWidths(
 			if _, ok := widths[col]; !ok {
 				widths[col] = minWidth
 			}
-			if len(elem) > widths[col] {
-				widths[col] = len(elem)
+			if lenNoAnsi(elem) > widths[col] {
+				widths[col] = lenNoAnsi(elem)
 			}
 		}
 	}
 	return widths
+}
+
+func lenNoAnsi(str string) int {
+	const ansi = "[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]"
+	var re = regexp.MustCompile(ansi)
+	return len(re.ReplaceAllString(str, ""))
 }
 
 func (f *Formatter) spaceCols(
@@ -96,10 +103,13 @@ func (f *Formatter) spaceCols(
 	for _, row := range rows {
 		for col, val := range row {
 			diff := 0
-			if l := len(val); l < widths[col] {
+			if l := lenNoAnsi(val); l < widths[col] {
 				diff = widths[col] - l
 			}
-			row[col] = val + strings.Repeat(string(paddingChar), diff+padding)
+			row[col] = val
+			if col < len(row)-1 {
+				row[col] = row[col] + strings.Repeat(string(paddingChar), diff+padding)
+			}
 		}
 	}
 	return rows
