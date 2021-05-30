@@ -24,7 +24,8 @@ func (m *MockColorer) Color(text, color string) (string, bool) {
 
 func (suite *StencillerSuite) SetupTest() {
 	suite.Colorer = new(MockColorer)
-	suite.Stenciller = &Stenciller{colorer: suite.Colorer}
+	suite.Stenciller = &Stenciller{}
+	colorer = suite.Colorer
 }
 
 func (suite *StencillerSuite) TestAddTmplStencil() {
@@ -344,7 +345,7 @@ func (suite *StencillerSuite) TestColorData() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", true)
 	suite.Colorer.On("Color", "value2", "green").Return("greenValue", true)
-	actual := suite.Stenciller.colorMap(stencil.Colors, data)
+	actual := colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -368,7 +369,7 @@ func (suite *StencillerSuite) TestColorDataWithValueWithoutColorDefinition() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
 	suite.Colorer.On("Color", "value3", "green").Return("greenValue3", true)
-	actual := suite.Stenciller.colorMap(stencil.Colors, data)
+	actual := colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -392,7 +393,7 @@ func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
 	suite.Colorer.On("Color", "value3", "notacolor").Return("", false)
-	actual := suite.Stenciller.colorMap(stencil.Colors, data)
+	actual := colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -403,7 +404,7 @@ func (suite *StencillerSuite) TestInterpolate() {
 	}
 	tmpl := "abc {{ .field2 }} def {{.Field1}}"
 	expected := "abc value2 def value1"
-	actual, err := suite.Stenciller.interpolate(tmpl, data)
+	actual, err := interpolate(tmpl, data)
 	suite.NoError(err)
 	suite.Equal(expected, actual)
 }
@@ -415,7 +416,7 @@ func (suite *StencillerSuite) TestInterpolateWithNonExistantKey() {
 	}
 	tmpl := "abc {{ .field2 }} def {{.Field3}}"
 	expected := "abc value2 def <no value>"
-	actual, err := suite.Stenciller.interpolate(tmpl, data)
+	actual, err := interpolate(tmpl, data)
 	suite.NoError(err)
 	suite.Equal(expected, actual)
 }
@@ -428,7 +429,7 @@ func (suite *StencillerSuite) TestInterpolateWithExtraMapKey() {
 	}
 	tmpl := "abc {{ .field2 }} def {{.Field1}}"
 	expected := "abc value2 def value1"
-	actual, err := suite.Stenciller.interpolate(tmpl, data)
+	actual, err := interpolate(tmpl, data)
 	suite.NoError(err)
 	suite.Equal(expected, actual)
 }
@@ -452,7 +453,7 @@ func (suite *StencillerSuite) TestGetRowSlices() {
 		ColumnOrder: columnOrder,
 		Headers:     headers,
 	}
-	actual := suite.Stenciller.getSliceRows(data, stencil)
+	actual := getSliceRows(data, stencil)
 	suite.Equal(expected, actual)
 
 }
