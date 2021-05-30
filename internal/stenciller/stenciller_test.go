@@ -24,7 +24,7 @@ func (m *MockColorer) Color(text, color string) (string, bool) {
 
 func (suite *StencillerSuite) SetupTest() {
 	suite.Colorer = new(MockColorer)
-	suite.Stenciller = &Stenciller{}
+	suite.Stenciller = &Stenciller{colorer: suite.Colorer}
 }
 
 func (suite *StencillerSuite) TestAddTmplStencil() {
@@ -326,7 +326,7 @@ func (suite *StencillerSuite) TestNotFindTmplStencil() {
 	suite.Nil(actual)
 }
 
-func (suite *StencillerSuite) TestColorData() {
+func (suite *StencillerSuite) TestColorMap() {
 	expected := map[string]string{
 		"key1": "blueValue",
 		"key2": "greenValue",
