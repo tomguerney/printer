@@ -31,6 +31,7 @@ import (
 // to the color of the color value. It returns the rows and columns as a 2D
 // string slice with a prefixed header row.
 type Stenciller struct {
+	colorer       colorer
 	tmplStencils  []*tmplStencil
 	tableStencils []*tableStencil
 }
@@ -48,12 +49,14 @@ type tableStencil struct {
 	Headers     []string
 }
 
-// New returns a pointer to a new Stenciller struct
-func New() *Stenciller {
-	return &Stenciller{}
+type colorer interface {
+	Color(text, color string) (string, bool)
 }
 
-var colorer domain.Colorer = c.New()
+// New returns a pointer to a new Stenciller struct
+func New() *Stenciller {
+	return &Stenciller{colorer: c.New()}
+}
 
 // AddTmplStencil adds a new Template Stencil
 func (s *Stenciller) AddTmplStencil(id, template string, colors map[string]string) error {
@@ -99,7 +102,7 @@ func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, err
 	if err != nil {
 		return "", err
 	}
-	coloredData := colorMap(stencil.Colors, data)
+	coloredData := s.colorMap(stencil.Colors, data)
 	interpolated, err := interpolate(stencil.Template, coloredData)
 	if err != nil {
 		return "", err
@@ -113,20 +116,59 @@ func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, err
 // slice. If the Headers fields of the Stencil isn't empty, it will will prepend
 // the headers to the 2D slice with a dynamically-sized divider row before
 // returning the result.
-func (s *Stenciller) TableStencil(id string, dataMaps []map[string]string) (coloredSlices [][]string, err error) {
+func (s *Stenciller) TableStencil(id string, dataMaps []map[string]string) (tableSlices [][]string, err error) {
 	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err
 	}
 	for _, m := range dataMaps {
-		mColored := colorMap(stencil.Colors, m)
+		mColored := s.colorMap(stencil.Colors, m)
 		sColored := mapToSliceInColumnOrder(mColored, stencil.ColumnOrder)
-		coloredSlices = append(coloredSlices, sColored)
+		tableSlices = append(tableSlices, sColored)
 	}
 	if headerSlices, ok := createHeaderSlices(stencil, dataMaps); ok {
-		coloredSlices = append(headerSlices, coloredSlices...)
+		tableSlices = append(headerSlices, tableSlices...)
 	}
-	return coloredSlices, nil
+	return tableSlices, nil
+
+}
+
+func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
+	for _, stencil := range s.tmplStencils {
+		if stencil.ID == id {
+			return stencil, nil
+		}
+	}
+	return nil, fmt.Errorf("Unable to find template stencil with id of %v", id)
+}
+
+func (s *Stenciller) findTableStencil(id string) (*tableStencil, error) {
+	for _, stencil := range s.tableStencils {
+		if stencil.ID == id {
+			return stencil, nil
+		}
+	}
+	return nil, fmt.Errorf("Unable to find table stencil with id of %v", id)
+}
+
+func (s *Stenciller) colorMap(colors map[string]string, data map[string]string) map[string]string {
+	colored := make(map[string]string, len(data))
+	for key, val := range data {
+		if col, ok := colors[key]; ok {
+			colored[key] = s.colorValue(val, col)
+		} else {
+			colored[key] = val
+		}
+	}
+	return colored
+}
+
+func (s *Stenciller) colorValue(val, col string) string {
+	if coloredVal, ok := s.colorer.Color(val, col); ok {
+		return coloredVal
+	}
+	log.Info().Msgf("Unable to set [value=%v] with color [%v]", val, col)
+	return val
 }
 
 func mapToSliceInColumnOrder(mapRow map[string]string, columnOrder []string) []string {
@@ -154,44 +196,6 @@ func createHeaderSlices(stencil *tableStencil, dataMaps []map[string]string) (_ 
 	colWidths := getColWidths(dataSlices)
 	divRow := createDivRow(colWidths)
 	return [][]string{stencil.Headers, divRow}, true
-}
-
-func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
-	for _, stencil := range s.tmplStencils {
-		if stencil.ID == id {
-			return stencil, nil
-		}
-	}
-	return nil, fmt.Errorf("Unable to find template stencil with id of %v", id)
-}
-
-func (s *Stenciller) findTableStencil(id string) (*tableStencil, error) {
-	for _, stencil := range s.tableStencils {
-		if stencil.ID == id {
-			return stencil, nil
-		}
-	}
-	return nil, fmt.Errorf("Unable to find table stencil with id of %v", id)
-}
-
-func colorMap(colors map[string]string, data map[string]string) map[string]string {
-	colored := make(map[string]string, len(data))
-	for key, val := range data {
-		if col, ok := colors[key]; ok {
-			colored[key] = colorValue(val, col)
-		} else {
-			colored[key] = val
-		}
-	}
-	return colored
-}
-
-func colorValue(val, col string) string {
-	if coloredVal, ok := colorer.Color(val, col); ok {
-		return coloredVal
-	}
-	log.Info().Msgf("Unable to set [value=%v] with color [%v]", val, col)
-	return val
 }
 
 func interpolate(tmpl string, data map[string]string) (string, error) {

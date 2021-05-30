@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"github.com/tomguerney/printer/internal/domain"
 )
 
 type FormatterSuite struct {
@@ -13,7 +12,7 @@ type FormatterSuite struct {
 }
 
 func (suite *FormatterSuite) SetupTest() {
-	tabwriterOptions := &domain.TabwriterOptions{
+	tabwriterOptions := &TabwriterOptions{
 		Minwidth: 0,
 		Tabwidth: 8,
 		Padding:  4,
@@ -22,35 +21,19 @@ func (suite *FormatterSuite) SetupTest() {
 	suite.Formatter = &Formatter{tabwriterOptions}
 }
 
-func (suite *FormatterSuite) TestMessage() {
+func (suite *FormatterSuite) TestText() {
 	msg := "test message"
 	expected := "test message\n"
-	actual := suite.Formatter.Msg(msg)
+	actual := suite.Formatter.Text(msg)
 	suite.Equal(expected, actual)
 }
 
-func (suite *FormatterSuite) TestMessageWithArgs() {
+func (suite *FormatterSuite) TestTextWithArgs() {
 	msg := "%v test message %v"
 	arg1 := "arg1"
 	arg2 := "arg2"
 	expected := "arg1 test message arg2\n"
-	actual := suite.Formatter.Msg(msg, arg1, arg2)
-	suite.Equal(expected, actual)
-}
-
-func (suite *FormatterSuite) TestError() {
-	msg := "test message"
-	expected := "Error: test message\n"
-	actual := suite.Formatter.Error(msg)
-	suite.Equal(expected, actual)
-}
-
-func (suite *FormatterSuite) TestErrorWithArgs() {
-	msg := "%v test message %v"
-	arg1 := "arg1"
-	arg2 := "arg2"
-	expected := "Error: arg1 test message arg2\n"
-	actual := suite.Formatter.Error(msg, arg1, arg2)
+	actual := suite.Formatter.Text(msg, arg1, arg2)
 	suite.Equal(expected, actual)
 }
 
@@ -65,12 +48,29 @@ func (suite *FormatterSuite) TestTabulate() {
 		"This    is          another    row",
 		"The     tertiary    row",
 	}
-	actual := suite.Formatter.Tabulate(nil, table)
+	actual := suite.Formatter.Tabulate(table)
+	suite.Equal(expected, actual)
+}
+
+func (suite *FormatterSuite) TestTabulateWithHeaders() {
+	table := [][]string{
+		{"The", "first", "row"},
+		{"This", "is", "another", "row"},
+		{"The", "tertiary", "row"},
+	}
+	headers := []string{"header1", "h2", "this is header3", "4"}
+	expected := []string{
+		"header1    h2          this is header3    4",
+		"The        first       row",
+		"This       is          another            row",
+		"The        tertiary    row",
+	}
+	actual := suite.Formatter.Tabulate(table, headers...)
 	suite.Equal(expected, actual)
 }
 
 func (suite *FormatterSuite) TestTabulateWithMorePadding() {
-	suite.Formatter.tabwriterOptions.Padding = 10
+	suite.Formatter.TWOptions.Padding = 10
 	table := [][]string{
 		{"The", "first", "row"},
 		{"This", "is", "another", "row"},
@@ -81,7 +81,7 @@ func (suite *FormatterSuite) TestTabulateWithMorePadding() {
 		"This          is                another          row",
 		"The           tertiary          row",
 	}
-	actual := suite.Formatter.Tabulate(nil, table)
+	actual := suite.Formatter.Tabulate(table)
 	suite.Equal(expected, actual)
 }
 

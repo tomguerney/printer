@@ -36,10 +36,11 @@ func (f *Formatter) SetTabwriterOptions(twOptions *TabwriterOptions) {
 	f.SetTabwriterOptions(twOptions)
 }
 
-// Msg returns the passed text appended with a newline. If the text contains
+// Text returns the passed text appended with a newline. If the text contains
 // formatting verbs (e.g. %v), they will be formatted as per the
 // "...interface{}" variadic parameter in the fashion of fmt.Printf()
-func (f *Formatter) Msg(text string, a ...interface{}) string {
+func (f *Formatter) Text(i interface{}, a ...interface{}) string {
+	text := fmt.Sprint(i)
 	formatted := fmt.Sprintf("%s\n", text)
 	if len(a) > 0 {
 		return fmt.Sprintf(formatted, a...)
@@ -58,7 +59,7 @@ func (f *Formatter) Msg(text string, a ...interface{}) string {
 // from a row of strings from the original 2D slice. Each row is spaced such
 // that when the slice is printed row by row, the element in each row appear
 // vertically aligned in equally-spaced columns
-func (f *Formatter) Tabulate(headers []string, rows [][]string) []string {
+func (f *Formatter) Tabulate(rows [][]string, headers ...string) []string {
 
 	widths := getColWidths(append(rows, headers), f.TWOptions.Minwidth)
 

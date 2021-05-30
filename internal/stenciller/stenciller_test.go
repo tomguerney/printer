@@ -25,7 +25,6 @@ func (m *MockColorer) Color(text, color string) (string, bool) {
 func (suite *StencillerSuite) SetupTest() {
 	suite.Colorer = new(MockColorer)
 	suite.Stenciller = &Stenciller{}
-	colorer = suite.Colorer
 }
 
 func (suite *StencillerSuite) TestAddTmplStencil() {
@@ -345,7 +344,7 @@ func (suite *StencillerSuite) TestColorData() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue", true)
 	suite.Colorer.On("Color", "value2", "green").Return("greenValue", true)
-	actual := colorMap(stencil.Colors, data)
+	actual := suite.Stenciller.colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -369,7 +368,7 @@ func (suite *StencillerSuite) TestColorDataWithValueWithoutColorDefinition() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
 	suite.Colorer.On("Color", "value3", "green").Return("greenValue3", true)
-	actual := colorMap(stencil.Colors, data)
+	actual := suite.Stenciller.colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
@@ -393,7 +392,7 @@ func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
 	}
 	suite.Colorer.On("Color", "value1", "blue").Return("blueValue1", true)
 	suite.Colorer.On("Color", "value3", "notacolor").Return("", false)
-	actual := colorMap(stencil.Colors, data)
+	actual := suite.Stenciller.colorMap(stencil.Colors, data)
 	suite.Equal(expected, actual)
 }
 
