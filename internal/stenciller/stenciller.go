@@ -135,7 +135,7 @@ func mapToSliceInColumnOrder(mapRow map[string]string, columnOrder []string) []s
 	for key, value := range mapRow {
 		col, err := indexOf(key, columnOrder)
 		if err != nil {
-			log.Info().Err(err)
+			log.Debug().Err(err)
 			continue
 		}
 		sliceRow[col] = value
@@ -143,7 +143,7 @@ func mapToSliceInColumnOrder(mapRow map[string]string, columnOrder []string) []s
 	return sliceRow
 }
 
-func createHeaderSlices(stencil *tableStencil, dataMaps []map[string]string) (headersWithDiv [][]string, ok bool) {
+func createHeaderSlices(stencil *tableStencil, dataMaps []map[string]string) (_ [][]string, ok bool) {
 	if len(stencil.Headers) == 0 {
 		return nil, false
 	}
