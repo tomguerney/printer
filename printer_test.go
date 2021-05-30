@@ -150,11 +150,12 @@ func (suite *PrinterSuite) TestTabulateWithHeaders() {
 		"row3",
 	}
 	suite.Formatter.On("Tabulate", table, headers).Return(expected)
-	Tabulate(table)
+	Tabulate(table, headers...)
 	suite.OutWriter.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[0]))
 	suite.OutWriter.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[1]))
 	suite.OutWriter.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[2]))
-	suite.OutWriter.AssertNumberOfCalls(suite.T(), "Write", 3)
+	suite.OutWriter.AssertCalled(suite.T(), "Write", fmt.Sprintln(expected[3]))
+	suite.OutWriter.AssertNumberOfCalls(suite.T(), "Write", 4)
 }
 
 func (suite *PrinterSuite) TestTmplStencil() {

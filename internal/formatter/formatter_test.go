@@ -17,6 +17,7 @@ func (suite *FormatterSuite) SetupTest() {
 		Tabwidth: 8,
 		Padding:  4,
 		Padchar:  ' ',
+		Divchar:  '-',
 	}
 	suite.Formatter = &Formatter{tabwriterOptions}
 }
@@ -61,6 +62,7 @@ func (suite *FormatterSuite) TestTabulateWithHeaders() {
 	headers := []string{"header1", "h2", "this is header3", "4"}
 	expected := []string{
 		"header1    h2          this is header3    4",
+		"-------    --------    ---------------    ---",
 		"The        first       row",
 		"This       is          another            row",
 		"The        tertiary    row",

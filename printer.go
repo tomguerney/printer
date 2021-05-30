@@ -161,8 +161,8 @@ func Feed() {
 }
 
 // Tabulate takes an array of string arrays and prints a table to output
-func Tabulate(rows [][]string) {
-	singleton.Tabulate(rows)
+func Tabulate(rows [][]string, headers ...string) {
+	singleton.Tabulate(rows, headers...)
 }
 
 // TmplStencil applies a string map to the stencil with the passed ID and prints
