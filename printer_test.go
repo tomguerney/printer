@@ -25,11 +25,11 @@ type PrinterSuite struct {
 func (suite *PrinterSuite) SetupTest() {
 	suite.Writer = new(MockWriter)
 	suite.Writer.On("Write", mock.Anything).Return(0, nil)
-	s.Writer = suite.Writer
+	s.OutWriter = suite.Writer
 }
 
 func (suite *PrinterSuite) TestMessage() {
-	Msg("Hello")
+	Out("Hello")
 	expected := "Hello\n"
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
@@ -72,21 +72,6 @@ func (suite *PrinterSuite) TestErrorWithArgument() {
 	suite.Writer.AssertCalled(suite.T(), "Write", expected)
 }
 
-func (suite *PrinterSuite) TestSError() {
-	errMsg := "error message"
-	expected := "Error: error message\n"
-	actual := SError(errMsg)
-	suite.Equal(expected, actual)
-}
-
-func (suite *PrinterSuite) TestSErrorWithArgument() {
-	errMsg := "%v message"
-	args := "error"
-	expected := "Error: error message\n"
-	actual := SError(errMsg, args)
-	suite.Equal(expected, actual)
-}
-
 func (suite *PrinterSuite) TestTabulate() {
 	table := [][]string{
 		{"The", "first", "row"},
@@ -105,22 +90,6 @@ func (suite *PrinterSuite) TestTabulate() {
 	suite.Writer.AssertCalled(suite.T(), "Write", expected[2])
 	suite.Writer.AssertNumberOfCalls(suite.T(), "Write", 3)
 }
-func (suite *PrinterSuite) TestSTabulate() {
-	table := [][]string{
-		{"The", "first", "row"},
-		{"This", "is", "another", "row"},
-		{"The", "tertiary", "row"},
-	}
-
-	expected := []string{
-		"The     first       row",
-		"This    is          another    row",
-		"The     tertiary    row",
-	}
-	actual := STabulate(table)
-	suite.Equal(expected, actual)
-}
-
 func (suite *PrinterSuite) TestAddStencilWithExistingID() {
 	id := "test-id"
 	template := "{{ .test }} template"

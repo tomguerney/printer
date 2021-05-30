@@ -8,7 +8,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	c "github.com/tomguerney/printer/internal/colorer"
-	"github.com/tomguerney/printer/internal/domain"
 )
 
 // Stenciller formats "data" maps of string key/value pairs according to

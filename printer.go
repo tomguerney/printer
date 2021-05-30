@@ -4,69 +4,55 @@ import (
 	"io"
 	"os"
 
-	"github.com/tomguerney/printer/internal/domain"
 	"github.com/tomguerney/printer/internal/setter"
 )
 
-// TabwriterOptions singleton with defaults
-var TabwriterOptions = &domain.TabwriterOptions{
-	Minwidth: 0,
-	Tabwidth: 8,
-	Padding:  4,
-	Padchar:  ' ',
+// Printer prints
+type Printer struct {
+	*setter.Setter
 }
 
-var s = setter.New(TabwriterOptions)
-
-//TODO error goes to stderr
-
-// Writer is the io.Writer to print to
-var Writer io.Writer = os.Stdout
-
-// SetWriter sets the writer of the setter
-func SetWriter(writer io.Writer) {
-	s.Writer = writer
+// NewSetter a new setter
+func NewSetter() *setter.Setter {
+	return setter.New()
 }
 
-// Msg prints a formatted message to output
-func Msg(i interface{}, a ...interface{}) {
-	s.Msg(i, a...)
+var s = setter.New()
+
+// OutWriter is the io.Writer to print to
+var OutWriter io.Writer = os.Stdout
+
+// ErrWriter is the io.Writer to print errors to
+var ErrWriter io.Writer = os.Stderr
+
+// SetOutWriter sets the OutWriter
+func SetOutWriter(writer io.Writer) {
+	s.OutWriter = writer
 }
 
-// SMsg returns a formatted message string
-func SMsg(i interface{}, a ...interface{}) string {
-	return s.SMsg(i, a...)
+// SetErrWriter sets the ErrWriter
+func SetErrWriter(writer io.Writer) {
+	s.ErrWriter = writer
 }
 
-// Error prints a formatted error message to output
-func Error(i interface{}, a ...interface{}) {
-	s.Error(i, a...)
+// Out prints formatted text to the OutWriter
+func Out(i interface{}, a ...interface{}) {
+	s.Out(i, a...)
 }
 
-// SError returns a formatted error message string
-func SError(i interface{}, a ...interface{}) string {
-	return s.SError(i, a...)
+// Err prints formatted text to ErrWriter
+func Err(i interface{}, a ...interface{}) {
+	s.Err(i, a...)
 }
 
-// Linefeed prints an empty line
-func Linefeed() {
-	s.Linefeed()
+// Feed prints an empty line
+func Feed() {
+	s.Feed()
 }
 
 // Tabulate takes an array of string arrays and prints a table to output
 func Tabulate(rows [][]string) {
 	s.Tabulate(rows)
-}
-
-// STabulate takes an array of string arrays and return an array of formatted
-// rows
-func STabulate(rows [][]string) []string {
-	return s.STabulate(rows)
-}
-
-// AddTmplStencil adds a new template stencil
-func AddTmplStencil(id, template string, colors map[string]string) error {
-	return s.AddTmplStencil(id, template, colors)
 }
 
 // TmplStencil applies a string map to the stencil with the passed ID and prints
@@ -75,25 +61,18 @@ func TmplStencil(id string, data map[string]string) error {
 	return s.TmplStencil(id, data)
 }
 
-// STmplStencil applies a string map to the stencil with the passed ID and
-// returns the result
-func STmplStencil(id string, data map[string]string) (string, error) {
-	return s.STmplStencil(id, data)
-}
-
-// AddTableStencil adds a new table stencil
-func AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
-	return s.AddTableStencil(id, headers, columnOrder, colors)
-}
-
 // TableStencil take an array of string maps and prints stencilled rows to
 // output
 func TableStencil(id string, rows []map[string]string) error {
 	return s.TableStencil(id, rows)
 }
 
-// STableStencil take an array of string maps and returns the stencilled rows to
-// output
-func STableStencil(id string, rows []map[string]string) ([]string, error) {
-	return s.STableStencil(id, rows)
+// AddTmplStencil adds a new template stencil
+func AddTmplStencil(id, template string, colors map[string]string) error {
+	return s.AddTmplStencil(id, template, colors)
+}
+
+// AddTableStencil adds a new table stencil
+func AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
+	return s.AddTableStencil(id, headers, columnOrder, colors)
 }

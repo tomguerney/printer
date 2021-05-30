@@ -5,64 +5,74 @@ import (
 	"io"
 	"os"
 
-	"github.com/tomguerney/printer/internal/domain"
 	"github.com/tomguerney/printer/internal/formatter"
 	"github.com/tomguerney/printer/internal/stenciller"
 )
 
 // Setter prints formatted and stencilled strings to the set io.Writer
 type Setter struct {
-	Writer     io.Writer
-	formatter  domain.Formatter
-	stenciller domain.Stenciller
+	OutWriter  io.Writer
+	ErrWriter  io.Writer
+	formatter  Formatter
+	stenciller Stenciller
 }
 
 // New returns a new Setter struct
-func New(tabwriterOptions *domain.TabwriterOptions) *Setter {
+func New() *Setter {
 	return &Setter{
 		os.Stdout,
-		formatter.New(tabwriterOptions),
+		os.Stderr,
+		formatter.New(),
 		stenciller.New(),
 	}
 }
 
-// Msg prints the passed text appended with a newline. If the text contains
-// formatting verbs (e.g. %v), they will be formatted as per the
-// "...interface{}" variadic parameter in the fashion of fmt.Printf()
-func (s *Setter) Msg(i interface{}, a ...interface{}) {
-	text := fmt.Sprint(i)
-	fmt.Fprintf(s.Writer, s.formatter.Msg(text, a...))
+// Formatter formats strings for simple and consistent output
+type Formatter interface {
+	Msg(string, ...interface{}) string
+	Tabulate(headers []string, rows [][]string) []string
+	SetTabwriterOptions(twOptions *formatter.TabwriterOptions)
 }
 
-// SMsg returns the passed text appended with a newline. If the text contains
-// formatting verbs (e.g. %v), they will be formatted as per the
-// "...interface{}" variadic parameter in the fashion of fmt.Printf()
-func (s *Setter) SMsg(i interface{}, a ...interface{}) string {
-	text := fmt.Sprint(i)
-	return s.formatter.Msg(text, a...)
+// Stenciller formats "data" maps of string key/value pairs according to
+// predefined Stencils.
+type Stenciller interface {
+	AddTmplStencil(id, template string, colors map[string]string) error
+	AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error
+	TmplStencil(id string, data map[string]string) (string, error)
+	TableStencil(id string, rows []map[string]string) ([][]string, error)
 }
 
-// Error prints the passed text prefixed with "Error: " and appended with a
+// Colorer colors text for terminal output
+type Colorer interface {
+	Color(text, color string) (string, bool)
+}
+
+// SetTabwriterOptions sets tabwriter options
+func (s *Setter) SetTabwriterOptions(twOptions *formatter.TabwriterOptions) {
+	s.formatter.SetTabwriterOptions(twOptions)
+}
+
+// Out prints the passed text appended with a newline to the Writer. If the text
+// contains formatting verbs (e.g. %v), they will be formatted as per the
+// "...interface{}" variadic parameter in the fashion of fmt.Printf()
+func (s *Setter) Out(i interface{}, a ...interface{}) {
+	text := fmt.Sprint(i)
+	fmt.Fprintf(s.OutWriter, s.formatter.Msg(text, a...))
+}
+
+// Err prints the passed text prefixed with "Error: " and appended with a
 // newline. If the text contains formatting verbs (e.g. %v), they will be
 // formatted as per the "...interface{}" variadic parameter in the fashion of
 // fmt.Printf()
-func (s *Setter) Error(i interface{}, a ...interface{}) {
+func (s *Setter) Err(i interface{}, a ...interface{}) {
 	text := fmt.Sprint(i)
-	fmt.Fprintf(s.Writer, s.formatter.Error(text, a...))
+	fmt.Fprintf(s.ErrWriter, s.formatter.Msg(text, a...))
 }
 
-// SError returns the passed text prefixed with "Error: " and appended with a
-// newline. If the text contains formatting verbs (e.g. %v), they will be
-// formatted as per the "...interface{}" variadic parameter in the fashion of
-// fmt.Printf()
-func (s *Setter) SError(i interface{}, a ...interface{}) string {
-	text := fmt.Sprint(i)
-	return s.formatter.Error(text, a...)
-}
-
-// Linefeed prints an empty line
-func (s *Setter) Linefeed() {
-	fmt.Fprintln(s.Writer)
+// Feed prints an empty line to the OutWriter
+func (s *Setter) Feed() {
+	fmt.Fprintln(s.OutWriter)
 }
 
 // Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
@@ -75,21 +85,8 @@ func (s *Setter) Linefeed() {
 func (s *Setter) Tabulate(rows [][]string) {
 	tabulated := s.formatter.Tabulate(nil, rows)
 	for _, row := range tabulated {
-		fmt.Fprintln(s.Writer, row)
+		fmt.Fprintln(s.OutWriter, row)
 	}
-}
-
-// STabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
-// per the tabwriterOptions passed into the domain.Formatter and the internal
-// logic of that package. The default tabwriterOptions are set at the root
-// printer package level.
-//
-// STabulate returns a one-dimensional slice of strings, with each element
-// formed from a row of strings from the original 2D slice. Each row is spaced
-// such that when the slice is printed row by row, the element in each row
-// appear vertically aligned in equally-spaced columns
-func (s *Setter) STabulate(rows [][]string) []string {
-	return s.formatter.Tabulate(nil, rows)
 }
 
 // TmplStencil takes the ID of a Template Stencil and a "data" map with string
@@ -107,22 +104,8 @@ func (s *Setter) TmplStencil(id string, data map[string]string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(s.Writer, result)
+	fmt.Fprintln(s.OutWriter, result)
 	return nil
-}
-
-// STmplStencil takes the ID of a Template Stencil and a "data" map with string
-// key/values. It returns an error if it can't find a Stencil with the passed
-// ID. It applies the Template Stencil to the map and returns the result.
-func (s *Setter) STmplStencil(
-	id string,
-	data map[string]string,
-) (string, error) {
-	result, err := s.stenciller.TmplStencil(id, data)
-	if err != nil {
-		return "", err
-	}
-	return result, nil
 }
 
 // TableStencil takes the ID of a Table Stencil and a slice of "row" maps with
@@ -143,18 +126,6 @@ func (s *Setter) TableStencil(id string, rows []map[string]string) error {
 	}
 	s.Tabulate(result)
 	return nil
-}
-
-// STableStencil takes the ID of a Table Stencil and a slice of "row" maps with
-// string key/values. It returns an error if it can't find a Stencil with the
-// passed ID. It applies the Table Stencil to the map slice and tabulates and
-// returns the result.
-func (s *Setter) STableStencil(id string, rows []map[string]string) ([]string, error) {
-	result, err := s.stenciller.TableStencil(id, rows)
-	if err != nil {
-		return nil, err
-	}
-	return s.STabulate(result), nil
 }
 
 // AddTmplStencil adds a new Template Stencil with the passed ID and colors.

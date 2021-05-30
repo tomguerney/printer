@@ -4,7 +4,8 @@ import (
 	"github.com/fatih/color"
 )
 
-// Colorer colors strings
+// Colorer colors text for terminal output using the "github.com/fatih/color"
+// package
 type Colorer struct{}
 
 // New returns a pointer to a new Colorer struct
@@ -12,8 +13,9 @@ func New() *Colorer {
 	return &Colorer{}
 }
 
-// Color transforms the string into one of the available colors
-func (c *Colorer) Color(text string, colorName string) (string, bool) {
+// Color transforms a string into one of the available colors. If the color is
+// not available the string will not be coloured and ok will be false. 
+func (c *Colorer) Color(text string, colorName string) (colored string, ok bool) {
 	switch colorName {
 	case "black":
 		return c.Black(text), true
@@ -32,7 +34,7 @@ func (c *Colorer) Color(text string, colorName string) (string, bool) {
 	case "white":
 		return c.White(text), true
 	default:
-		return "", false
+		return text, false
 	}
 }
 

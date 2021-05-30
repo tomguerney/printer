@@ -4,20 +4,36 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"github.com/tomguerney/printer/internal/domain"
 )
 
 // Formatter formats strings for simple and consistent output
 type Formatter struct {
-	tabwriterOptions *domain.TabwriterOptions
+	TWOptions *TabwriterOptions
 }
 
 // New returns a pointer to a new Formatter struct
-func New(tabwriterOptions *domain.TabwriterOptions) *Formatter {
-	return &Formatter{
-		tabwriterOptions,
+func New() *Formatter {
+	defaultTabwriterOptions := &TabwriterOptions{
+		Minwidth: 0,
+		Tabwidth: 8,
+		Padding:  4,
+		Padchar:  ' ',
+		Divchar:  '-',
 	}
+	return &Formatter{
+		defaultTabwriterOptions,
+	}
+}
+
+// TabwriterOptions opt
+type TabwriterOptions struct {
+	Minwidth, Tabwidth, Padding int
+	Padchar, Divchar            byte
+}
+
+// SetTabwriterOptions sets tabwriter options
+func (f *Formatter) SetTabwriterOptions(twOptions *TabwriterOptions) {
+	f.SetTabwriterOptions(twOptions)
 }
 
 // Msg returns the passed text appended with a newline. If the text contains
@@ -33,19 +49,6 @@ func (f *Formatter) Msg(text string, a ...interface{}) string {
 
 }
 
-// Error returns the passed text prefixed with "Error: " and appended with a
-// newline. If the text contains formatting verbs (e.g. %v), they will be
-// formatted as per the "...interface{}" variadic parameter in the fashion of
-// fmt.Printf()
-func (f *Formatter) Error(text string, a ...interface{}) string {
-	formatted := fmt.Sprintf("Error: %s\n", text)
-	if len(a) > 0 {
-		return fmt.Sprintf(formatted, a...)
-	} else {
-		return fmt.Sprint(formatted)
-	}
-}
-
 // Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
 // per the tabwriterOptions passed into the NewWriter function from the
 // "text/tabwriter" package from the Go standard library. The default
@@ -57,24 +60,24 @@ func (f *Formatter) Error(text string, a ...interface{}) string {
 // vertically aligned in equally-spaced columns
 func (f *Formatter) Tabulate(headers []string, rows [][]string) []string {
 
-	widths := getColWidths(append(rows, headers), f.tabwriterOptions.Minwidth)
+	widths := getColWidths(append(rows, headers), f.TWOptions.Minwidth)
 
-	if headers != nil && len(headers) < 0 {
-		divRow := createDivRow(widths, f.tabwriterOptions.Minwidth)
+	if headers != nil && len(headers) > 0 {
+		divRow := createDivRow(widths, f.TWOptions.Minwidth, f.TWOptions.Divchar)
 		headerRows := [][]string{headers, divRow}
 		rows = append(headerRows, rows...)
 	}
 
-	spacedRows := spaceCols(
+	paddedRows := padRows(
 		rows,
 		widths,
-		f.tabwriterOptions.Padding,
-		f.tabwriterOptions.Padchar,
+		f.TWOptions.Padding,
+		f.TWOptions.Padchar,
 	)
 
 	strRows := make([]string, len(rows))
 
-	for i, row := range spacedRows {
+	for i, row := range paddedRows {
 		strRows[i] = strings.Join(row, "")
 	}
 	return strRows
@@ -101,7 +104,7 @@ func lenNoAnsi(str string) int {
 	return len(re.ReplaceAllString(str, ""))
 }
 
-func spaceCols(rows [][]string, widths map[int]int, padding int, paddingChar byte) [][]string {
+func padRows(rows [][]string, widths map[int]int, padding int, paddingChar byte) [][]string {
 	for _, row := range rows {
 		for col, val := range row {
 			diff := 0
@@ -117,13 +120,13 @@ func spaceCols(rows [][]string, widths map[int]int, padding int, paddingChar byt
 	return rows
 }
 
-func createDivRow(colWidths map[int]int, minWidth int) []string {
+func createDivRow(colWidths map[int]int, minWidth int, divChar byte) []string {
 	divRow := make([]string, len(colWidths))
 	for col, width := range colWidths {
 		if width < minWidth {
-			divRow[col] = strings.Repeat("-", minWidth)
+			divRow[col] = strings.Repeat(string(divChar), minWidth)
 		} else {
-			divRow[col] = strings.Repeat("-", width)
+			divRow[col] = strings.Repeat(string(divChar), width)
 		}
 	}
 	return divRow

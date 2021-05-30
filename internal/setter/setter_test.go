@@ -95,6 +95,7 @@ type SetterSuite struct {
 	suite.Suite
 	Setter     *Setter
 	Writer     *MockWriter
+	ErrWriter  *MockWriter
 	Formatter  *MockFormatter
 	Stenciller *MockStenciller
 }
@@ -104,7 +105,7 @@ func (suite *SetterSuite) SetupTest() {
 	suite.Writer.On("Write", mock.Anything).Return(0, nil)
 	suite.Formatter = new(MockFormatter)
 	suite.Stenciller = new(MockStenciller)
-	suite.Setter = &Setter{suite.Writer, suite.Formatter, suite.Stenciller}
+	suite.Setter = &Setter{suite.Writer, suite.ErrWriter, suite.Formatter, suite.Stenciller}
 }
 
 func (suite *SetterSuite) TestMessage() {
