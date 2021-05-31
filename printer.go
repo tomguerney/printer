@@ -50,9 +50,40 @@ func GetPrinter() *Printer {
 
 var singleton = New()
 
+// SetOutWriter sets the OutWriter
+func SetOutWriter(writer io.Writer) {
+	singleton.SetOutWriter(writer)
+}
+
+func (p *Printer) SetOutWriter(writer io.Writer) {
+	p.OutWriter = writer
+}
+
+// SetErrWriter sets the ErrWriter
+func SetErrWriter(writer io.Writer) {
+	singleton.SetErrWriter(writer)
+}
+
+func (p *Printer) SetErrWriter(writer io.Writer) {
+	p.OutWriter = writer
+}
+
+// SetTabwriterOptions sets tabwriter options
+func SetTabwriterOptions(twOptions *formatter.TabwriterOptions) {
+	singleton.formatter.SetTabwriterOptions(twOptions)
+}
+
+func (p *Printer) SetTabwriterOptions(twOptions *formatter.TabwriterOptions) {
+	p.formatter.SetTabwriterOptions(twOptions)
+}
+
 // Out prints the passed text appended with a newline to the Writer. If the text
 // contains formatting verbs (e.g. %v), they will be formatted as per the
 // "...interface{}" variadic parameter in the fashion of fmt.Printf()
+func Out(i interface{}, a ...interface{}) {
+	singleton.Out(i, a...)
+}
+
 func (p *Printer) Out(i interface{}, a ...interface{}) {
 	fmt.Fprintf(p.OutWriter, p.formatter.Text(i, a...))
 }
@@ -61,12 +92,19 @@ func (p *Printer) Out(i interface{}, a ...interface{}) {
 // newline. If the text contains formatting verbs (e.g. %v), they will be
 // formatted as per the "...interface{}" variadic parameter in the fashion of
 // fmt.Printf()
+func Err(i interface{}, a ...interface{}) {
+	singleton.Err(i, a...)
+}
+
 func (p *Printer) Err(i interface{}, a ...interface{}) {
-	text := fmt.Sprint(i)
-	fmt.Fprintf(p.ErrWriter, p.formatter.Text(text, a...))
+	fmt.Fprintf(p.ErrWriter, p.formatter.Text(i, a...))
 }
 
 // Feed prints an empty line to the OutWriter
+func Feed() {
+	singleton.Feed()
+}
+
 func (p *Printer) Feed() {
 	fmt.Fprintln(p.OutWriter)
 }
@@ -78,6 +116,10 @@ func (p *Printer) Feed() {
 //
 // Tabulate prints each row from the original 2D slice spaced such that each
 // element in each row appear vertically aligned in equally-spaced columns.
+func Tabulate(rows [][]string, headers ...string) {
+	singleton.Tabulate(rows, headers...)
+}
+
 func (p *Printer) Tabulate(rows [][]string, headers ...string) {
 	tabulated := p.formatter.Tabulate(rows, headers...)
 	for _, row := range tabulated {
@@ -95,6 +137,10 @@ func (p *Printer) Tabulate(rows [][]string, headers ...string) {
 // any key in the map that matches a key in the Template Stencil's color map and
 // transforms the data value string to the color of the color value. The data
 // map is then applied to the template to produce a single string.
+func TmplStencil(id string, data map[string]string) error {
+	return singleton.TmplStencil(id, data)
+}
+
 func (p *Printer) TmplStencil(id string, data map[string]string) error {
 	result, err := p.stenciller.TmplStencil(id, data)
 	if err != nil {
@@ -115,6 +161,10 @@ func (p *Printer) TmplStencil(id string, data map[string]string) error {
 // that matches a key in the Stencil's color map and transforms the data value
 // string to the color of the color value. It returns the rows and columns as a
 // 2D string slice with a prefixed header row.
+func TableStencil(id string, rows []map[string]string) error {
+	return singleton.TableStencil(id, rows)
+}
+
 func (p *Printer) TableStencil(id string, rows []map[string]string) error {
 	result, err := p.stenciller.TableStencil(id, rows)
 	if err != nil {
@@ -125,69 +175,20 @@ func (p *Printer) TableStencil(id string, rows []map[string]string) error {
 }
 
 // AddTmplStencil adds a new Template Stencil with the passed ID and colors.
+func AddTmplStencil(id, template string, colors map[string]string) error {
+	return singleton.AddTmplStencil(id, template, colors)
+}
+
 func (p *Printer) AddTmplStencil(id, template string, colors map[string]string) error {
 	return p.stenciller.AddTmplStencil(id, template, colors)
 }
 
 // AddTableStencil adds a new table Stencil with the passed ID, headers, and
 // colors.
-func (p *Printer) AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
-	return p.stenciller.AddTableStencil(id, headers, columnOrder, colors)
-}
-
-// SetOutWriter sets the OutWriter
-func SetOutWriter(writer io.Writer) {
-	singleton.OutWriter = writer
-}
-
-// SetErrWriter sets the ErrWriter
-func SetErrWriter(writer io.Writer) {
-	singleton.ErrWriter = writer
-}
-
-// SetTabwriterOptions sets tabwriter options
-func SetTabwriterOptions(twOptions *formatter.TabwriterOptions) {
-	singleton.formatter.SetTabwriterOptions(twOptions)
-}
-
-// Out prints formatted text to the OutWriter
-func Out(i interface{}, a ...interface{}) {
-	singleton.Out(i, a...)
-}
-
-// Err prints formatted text to ErrWriter
-func Err(i interface{}, a ...interface{}) {
-	singleton.Err(i, a...)
-}
-
-// Feed prints an empty line
-func Feed() {
-	singleton.Feed()
-}
-
-// Tabulate takes an array of string arrays and prints a table to output
-func Tabulate(rows [][]string, headers ...string) {
-	singleton.Tabulate(rows, headers...)
-}
-
-// TmplStencil applies a string map to the stencil with the passed ID and prints
-// it to output
-func TmplStencil(id string, data map[string]string) error {
-	return singleton.TmplStencil(id, data)
-}
-
-// TableStencil take an array of string maps and prints stencilled rows to
-// output
-func TableStencil(id string, rows []map[string]string) error {
-	return singleton.TableStencil(id, rows)
-}
-
-// AddTmplStencil adds a new template stencil
-func AddTmplStencil(id, template string, colors map[string]string) error {
-	return singleton.AddTmplStencil(id, template, colors)
-}
-
-// AddTableStencil adds a new table stencil
 func AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
 	return singleton.AddTableStencil(id, headers, columnOrder, colors)
+}
+
+func (p *Printer) AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
+	return p.stenciller.AddTableStencil(id, headers, columnOrder, colors)
 }
