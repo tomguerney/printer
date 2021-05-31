@@ -65,8 +65,7 @@ func (f *Formatter) Tabulate(rows [][]string, headers ...string) []string {
 
 	if headers != nil && len(headers) > 0 {
 		divRow := createDivRow(widths, f.TWOptions.Minwidth, f.TWOptions.Divchar)
-		headerRows := [][]string{headers, divRow}
-		rows = append(headerRows, rows...)
+		rows = append([][]string{headers, divRow}, rows...)
 	}
 
 	paddedRows := padRows(
