@@ -58,6 +58,10 @@ func New() *Stenciller {
 	return &Stenciller{colorer: c.New()}
 }
 
+func (s *Stenciller) Color(text, color string) (string, bool) {
+	return s.colorer.Color(text, color)
+}
+
 // AddTmplStencil adds a new Template Stencil
 func (s *Stenciller) AddTmplStencil(id, template string, colors map[string]string) error {
 	if id == "" {

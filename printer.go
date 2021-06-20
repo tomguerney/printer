@@ -31,6 +31,7 @@ type Stenciller interface {
 	AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error
 	TmplStencil(id string, data map[string]string) (string, error)
 	TableStencil(id string, rows []map[string]string) ([][]string, error)
+	Color(text, color string) (string, bool)
 }
 
 // New a new printer
@@ -107,6 +108,14 @@ func Feed() {
 
 func (p *Printer) Feed() {
 	fmt.Fprintln(p.OutWriter)
+}
+
+func Color(text, color string) (string, bool) {
+	return singleton.Color(text, color)
+}
+
+func (p *Printer) Color(text, color string) (string, bool) {
+	return p.stenciller.Color(text, color)
 }
 
 // Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as

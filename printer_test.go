@@ -64,6 +64,11 @@ func (m *MockStenciller) TableStencil(id string, rows []map[string]string) ([][]
 	return args.Get(0).([][]string), args.Error(1)
 }
 
+func (m *MockStenciller) Color(text, color string) (string, bool) {
+	args := m.Called(text, color)
+	return args.String(0), args.Bool(1)
+}
+
 type PrinterSuite struct {
 	suite.Suite
 	OutWriter  *MockWriter
