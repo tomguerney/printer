@@ -110,12 +110,14 @@ func (p *Printer) Feed() {
 	fmt.Fprintln(p.OutWriter)
 }
 
-func Color(text, color string) (string, bool) {
+// Will return plain text if color not found
+func Color(text, color string) string {
 	return singleton.Color(text, color)
 }
 
-func (p *Printer) Color(text, color string) (string, bool) {
-	return p.stenciller.Color(text, color)
+func (p *Printer) Color(text, color string) string {
+	colorized, _ := p.stenciller.Color(text, color)
+	return colorized
 }
 
 // Tabulate takes a 2D slice of rows and columns. The 2D slice is tabulated as
