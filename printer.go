@@ -17,6 +17,18 @@ type Printer struct {
 	stenciller Stenciller
 }
 
+// Colors
+const (
+	Black   = "black"
+	Red     = "red"
+	Green   = "green"
+	Yellow  = "yellow"
+	Blue    = "blue"
+	Magenta = "magenta"
+	Cyan    = "cyan"
+	White   = "white"
+)
+
 // Formatter formats strings for simple and consistent output
 type Formatter interface {
 	Text(interface{}, ...interface{}) string
