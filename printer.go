@@ -55,12 +55,17 @@ type Prompter interface {
 
 // TemplateStencil is
 type TemplateStencil struct {
-	*stenciller.TemplateStencil
+	ID       string
+	Template string
+	Colors   map[string]string
 }
 
 // TableStencil is
 type TableStencil struct {
-	*stenciller.TableStencil
+	ID          string
+	Colors      map[string]string
+	ColumnOrder []string
+	Headers     []string
 }
 
 // New a new printer
@@ -262,7 +267,11 @@ func AddTemplateStencil(stencil *TemplateStencil) error {
 
 // AddTemplateStencil adds a new Template Stencil with the passed ID and colors.
 func (p *Printer) AddTemplateStencil(stencil *TemplateStencil) error {
-	return p.stenciller.AddTemplateStencil(stencil.TemplateStencil)
+	return p.stenciller.AddTemplateStencil(&stenciller.TemplateStencil{
+		ID:       stencil.ID,
+		Template: stencil.Template,
+		Colors:   stencil.Colors,
+	})
 }
 
 // AddTableStencil adds a new table Stencil with the passed ID, headers, and
@@ -274,7 +283,12 @@ func AddTableStencil(stencil *TableStencil) error {
 // AddTableStencil adds a new table Stencil with the passed ID, headers, and
 // colors.
 func (p *Printer) AddTableStencil(stencil *TableStencil) error {
-	return p.stenciller.AddTableStencil(stencil.TableStencil)
+	return p.stenciller.AddTableStencil(&stenciller.TableStencil{
+		ID:          stencil.ID,
+		Colors:      stencil.Colors,
+		ColumnOrder: stencil.ColumnOrder,
+		Headers:     stencil.Headers,
+	})
 }
 
 // Select selects
