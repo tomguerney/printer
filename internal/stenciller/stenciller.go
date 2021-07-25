@@ -66,37 +66,30 @@ func (s *Stenciller) Color(text, color string) (string, bool) {
 }
 
 // AddTemplateStencil adds a new Template Stencil
-func (s *Stenciller) AddTemplateStencil(id, template string, colors map[string]string) error {
-	if id == "" {
+func (s *Stenciller) AddTemplateStencil(stencil *TemplateStencil) error {
+	if stencil.ID == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
-	for _, stencil := range s.templateStencils {
-		if stencil.ID == id {
-			return fmt.Errorf("Template Stencil with ID %v already exists", id)
+	for _, existing := range s.templateStencils {
+		if stencil.ID == existing.ID {
+			return fmt.Errorf("Template Stencil with ID %v already exists", stencil.ID)
 		}
 	}
-	s.templateStencils = append(s.templateStencils, &TemplateStencil{id, template, colors})
+	s.templateStencils = append(s.templateStencils, stencil)
 	return nil
 }
 
 // AddTableStencil adds a new Table Stencil
-func (s *Stenciller) AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
-	if id == "" {
+func (s *Stenciller) AddTableStencil(stencil *TableStencil) error {
+	if stencil.ID == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
-	for _, stencil := range s.tableStencils {
-		if stencil.ID == id {
-			return fmt.Errorf("Table Stencil with ID %v already exists", id)
+	for _, existing := range s.tableStencils {
+		if stencil.ID == existing.ID {
+			return fmt.Errorf("Table Stencil with ID %v already exists", stencil.ID)
 		}
 	}
-	s.tableStencils = append(
-		s.tableStencils,
-		&TableStencil{
-			ID:          id,
-			Headers:     headers,
-			Colors:      colors,
-			ColumnOrder: columnOrder,
-		})
+	s.tableStencils = append(s.tableStencils, stencil)
 	return nil
 }
 

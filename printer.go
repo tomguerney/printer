@@ -41,8 +41,8 @@ type Formatter interface {
 // Stenciller formats "data" maps of string key/value pairs according to
 // predefined Stencils.
 type Stenciller interface {
-	AddTemplateStencil(id, template string, colors map[string]string) error
-	AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error
+	AddTemplateStencil(*TemplateStencil) error
+	AddTableStencil(*TableStencil) error
 	UseTemplateStencil(id string, data map[string]string) (string, error)
 	UseTableStencil(id string, rows []map[string]string) ([][]string, error)
 	Color(text, color string) (string, bool)
@@ -256,25 +256,25 @@ func (p *Printer) UseTableStencil(id string, rows []map[string]string) error {
 }
 
 // AddTmplStencil adds a new Template Stencil with the passed ID and colors.
-func AddTmplStencil(id, template string, colors map[string]string) error {
-	return singleton.AddTmplStencil(id, template, colors)
+func AddTemplateStencil(stencil *TemplateStencil) error {
+	return singleton.AddTemplateStencil(stencil)
 }
 
-// AddTmplStencil adds a new Template Stencil with the passed ID and colors.
-func (p *Printer) AddTmplStencil(id, template string, colors map[string]string) error {
-	return p.stenciller.AddTemplateStencil(id, template, colors)
-}
-
-// AddTableStencil adds a new table Stencil with the passed ID, headers, and
-// colors.
-func AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
-	return singleton.AddTableStencil(id, headers, columnOrder, colors)
+// AddTemplateStencil adds a new Template Stencil with the passed ID and colors.
+func (p *Printer) AddTemplateStencil(stencil *TemplateStencil) error {
+	return p.stenciller.AddTemplateStencil(stencil)
 }
 
 // AddTableStencil adds a new table Stencil with the passed ID, headers, and
 // colors.
-func (p *Printer) AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
-	return p.stenciller.AddTableStencil(id, headers, columnOrder, colors)
+func AddTableStencil(stencil *TableStencil) error {
+	return singleton.AddTableStencil(stencil)
+}
+
+// AddTableStencil adds a new table Stencil with the passed ID, headers, and
+// colors.
+func (p *Printer) AddTableStencil(stencil *TableStencil) error {
+	return p.stenciller.AddTableStencil(stencil)
 }
 
 // Select selects

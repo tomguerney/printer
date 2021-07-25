@@ -34,52 +34,65 @@ func (suite *StencillerSuite) TestAddTmplStencil() {
 	colors := map[string]string{
 		"test": "red",
 	}
-	err := suite.Stenciller.AddTemplateStencil(id, template, colors)
+	stencil := &TemplateStencil{
+		ID:       id,
+		Template: template,
+		Colors:   colors,
+	}
+	err := suite.Stenciller.AddTemplateStencil(stencil)
 	suite.NoError(err)
 	suite.Len(suite.Stenciller.templateStencils, 1)
 }
 
 func (suite *StencillerSuite) TestAddTmplStencilWithExistingID() {
-	stencil := &TemplateStencil{ID: "test-id",
+	stencil1 := &TemplateStencil{
+		ID:       "test-id",
 		Template: "{{ .test }} template",
 		Colors: map[string]string{
 			"test": "red",
 		}}
-	suite.Stenciller.templateStencils =
-		append(suite.Stenciller.templateStencils, stencil)
+	suite.Stenciller.templateStencils = append(suite.Stenciller.templateStencils, stencil1)
+	stencil2 := &TemplateStencil{
+		ID:       stencil1.ID,
+		Template: "{{ .Template }}",
+	}
 	suite.Len(suite.Stenciller.templateStencils, 1)
-	err := suite.Stenciller.AddTemplateStencil(stencil.ID, "{{ .Template }}", nil)
+	err := suite.Stenciller.AddTemplateStencil(stencil2)
 	suite.Errorf(err, "Template Stencil with ID test-id already exists")
 }
 
 func (suite *StencillerSuite) TestAddTmplStencilWithEmptyID() {
-	err := suite.Stenciller.AddTemplateStencil("", "{{ .Template }}", nil)
+	stencil := &TemplateStencil{
+		ID:       "test-id",
+		Template: "{{ .Template }}",
+	}
+	err := suite.Stenciller.AddTemplateStencil(stencil)
 	suite.Errorf(err, "Stencil ID may not be empty")
 }
 
 func (suite *StencillerSuite) TestAddTableStencil() {
 	suite.Empty(suite.Stenciller.tableStencils)
-	id := "test-id"
-	colors := map[string]string{
-		"test": "red",
+	stencil := &TableStencil{
+		ID:      "test-id",
+		Headers: []string{"header1", "header2"},
+		Colors:  map[string]string{"test": "red"},
+		ColumnOrder: []string{"key1", "key2"},
 	}
-	headers := []string{"header1", "header2"}
-	columnOrder := []string{"key1", "key2"}
-	err := suite.Stenciller.AddTableStencil(id, headers, columnOrder, colors)
+	err := suite.Stenciller.AddTableStencil(stencil)
 	suite.NoError(err)
 	suite.Len(suite.Stenciller.tableStencils, 1)
 }
 
 func (suite *StencillerSuite) TestAddTableStencilWithExistingID() {
-	stencil := &TableStencil{ID: "test-id",
+	stencil := &TableStencil{
+		ID:      "test-id",
 		Headers: []string{"header1", "header2"},
-		Colors: map[string]string{
-			"test": "red",
-		}}
+		Colors:  map[string]string{"test": "red"},
+	}
 	suite.Stenciller.tableStencils =
 		append(suite.Stenciller.tableStencils, stencil)
 	suite.Len(suite.Stenciller.tableStencils, 1)
-	err := suite.Stenciller.AddTableStencil(stencil.ID, nil, nil, nil)
+	err := suite.Stenciller.AddTableStencil(&TableStencil{ID: stencil.ID})
 	suite.Errorf(err, "Table Stencil with ID test-id already exists")
 }
 
@@ -89,17 +102,19 @@ func (suite *StencillerSuite) TestAddTableStencilWithEmptyID() {
 }
 
 func (suite *StencillerSuite) TestTmplStencil() {
-	id := "test-id"
-	template := "{{ .test }} template"
-	colors := map[string]string{
-		"test": "red",
+	stencil := &TemplateStencil{
+		ID:       "test-id",
+		Template: "{{ .test }} template",
+		Colors: map[string]string{
+			"test": "red",
+		},
 	}
-	suite.Stenciller.AddTemplateStencil(id, template, colors)
+	suite.Stenciller.AddTemplateStencil(stencil)
 	data := map[string]string{
 		"test": "value",
 	}
 	suite.Colorer.On("Color", "value", "red").Return("redValue", true)
-	actual, err := suite.Stenciller.UseTemplateStencil(id, data)
+	actual, err := suite.Stenciller.UseTemplateStencil(stencil.ID, data)
 	suite.NoError(err)
 	expected := "redValue template"
 	suite.Equal(expected, actual)
