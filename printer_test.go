@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/tomguerney/printer/internal/formatter"
+	"github.com/tomguerney/printer/internal/stenciller"
 )
 
 // MockWriter is a mock io.Writer for testing
@@ -44,13 +45,13 @@ type MockStenciller struct {
 	mock.Mock
 }
 
-func (m *MockStenciller) AddTemplateStencil(id, template string, colors map[string]string) error {
-	args := m.Called(id, template, colors)
+func (m *MockStenciller) AddTemplateStencil(stencil *stenciller.TemplateStencil) error {
+	args := m.Called(stencil)
 	return args.Error(0)
 }
 
-func (m *MockStenciller) AddTableStencil(id string, headers, columnOrder []string, colors map[string]string) error {
-	args := m.Called(id, headers, columnOrder, colors)
+func (m *MockStenciller) AddTableStencil(stencil *stenciller.TableStencil) error {
+	args := m.Called(stencil)
 	return args.Error(0)
 }
 

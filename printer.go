@@ -41,8 +41,8 @@ type Formatter interface {
 // Stenciller formats "data" maps of string key/value pairs according to
 // predefined Stencils.
 type Stenciller interface {
-	AddTemplateStencil(*TemplateStencil) error
-	AddTableStencil(*TableStencil) error
+	AddTemplateStencil(*stenciller.TemplateStencil) error
+	AddTableStencil(*stenciller.TableStencil) error
 	UseTemplateStencil(id string, data map[string]string) (string, error)
 	UseTableStencil(id string, rows []map[string]string) ([][]string, error)
 	Color(text, color string) (string, bool)
@@ -55,12 +55,12 @@ type Prompter interface {
 
 // TemplateStencil is
 type TemplateStencil struct {
-	stenciller.TemplateStencil
+	*stenciller.TemplateStencil
 }
 
 // TableStencil is
 type TableStencil struct {
-	stenciller.TableStencil
+	*stenciller.TableStencil
 }
 
 // New a new printer
@@ -255,14 +255,14 @@ func (p *Printer) UseTableStencil(id string, rows []map[string]string) error {
 	return nil
 }
 
-// AddTmplStencil adds a new Template Stencil with the passed ID and colors.
+// AddTemplateStencil adds a new Template Stencil with the passed ID and colors.
 func AddTemplateStencil(stencil *TemplateStencil) error {
 	return singleton.AddTemplateStencil(stencil)
 }
 
 // AddTemplateStencil adds a new Template Stencil with the passed ID and colors.
 func (p *Printer) AddTemplateStencil(stencil *TemplateStencil) error {
-	return p.stenciller.AddTemplateStencil(stencil)
+	return p.stenciller.AddTemplateStencil(stencil.TemplateStencil)
 }
 
 // AddTableStencil adds a new table Stencil with the passed ID, headers, and
@@ -274,7 +274,7 @@ func AddTableStencil(stencil *TableStencil) error {
 // AddTableStencil adds a new table Stencil with the passed ID, headers, and
 // colors.
 func (p *Printer) AddTableStencil(stencil *TableStencil) error {
-	return p.stenciller.AddTableStencil(stencil)
+	return p.stenciller.AddTableStencil(stencil.TableStencil)
 }
 
 // Select selects
