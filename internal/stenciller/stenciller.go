@@ -31,18 +31,20 @@ import (
 // to the color of the color value. It returns the rows and columns as a 2D
 // string slice with a prefixed header row.
 type Stenciller struct {
-	colorer       colorer
-	tmplStencils  []*tmplStencil
-	tableStencils []*tableStencil
+	colorer          colorer
+	templateStencils []*TemplateStencil
+	tableStencils    []*TableStencil
 }
 
-type tmplStencil struct {
+// TemplateStencil is a template stencil
+type TemplateStencil struct {
 	ID       string
 	Template string
 	Colors   map[string]string
 }
 
-type tableStencil struct {
+// TableStencil table stencils
+type TableStencil struct {
 	ID          string
 	Colors      map[string]string
 	ColumnOrder []string
@@ -58,21 +60,22 @@ func New() *Stenciller {
 	return &Stenciller{colorer: c.New()}
 }
 
+// Color does a color
 func (s *Stenciller) Color(text, color string) (string, bool) {
 	return s.colorer.Color(text, color)
 }
 
-// AddTmplStencil adds a new Template Stencil
-func (s *Stenciller) AddTmplStencil(id, template string, colors map[string]string) error {
+// AddTemplateStencil adds a new Template Stencil
+func (s *Stenciller) AddTemplateStencil(id, template string, colors map[string]string) error {
 	if id == "" {
 		return fmt.Errorf("Stencil ID may not be empty")
 	}
-	for _, stencil := range s.tmplStencils {
+	for _, stencil := range s.templateStencils {
 		if stencil.ID == id {
 			return fmt.Errorf("Template Stencil with ID %v already exists", id)
 		}
 	}
-	s.tmplStencils = append(s.tmplStencils, &tmplStencil{id, template, colors})
+	s.templateStencils = append(s.templateStencils, &TemplateStencil{id, template, colors})
 	return nil
 }
 
@@ -88,7 +91,7 @@ func (s *Stenciller) AddTableStencil(id string, headers, columnOrder []string, c
 	}
 	s.tableStencils = append(
 		s.tableStencils,
-		&tableStencil{
+		&TableStencil{
 			ID:          id,
 			Headers:     headers,
 			Colors:      colors,
@@ -97,12 +100,12 @@ func (s *Stenciller) AddTableStencil(id string, headers, columnOrder []string, c
 	return nil
 }
 
-// TmplStencil takes the ID of a Template Stencil and a "data" map with string
+// UseTemplateStencil takes the ID of a Template Stencil and a "data" map with string
 // key/value pairs. It returns an error if it can't find a Stencil with the
 // passed ID or template interpolation fails. It applies the Template Stencil to
 // the data map and returns the result.
-func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, error) {
-	stencil, err := s.findTmplStencil(id)
+func (s *Stenciller) UseTemplateStencil(id string, data map[string]string) (string, error) {
+	stencil, err := s.findTemplateStencil(id)
 	if err != nil {
 		return "", err
 	}
@@ -114,13 +117,13 @@ func (s *Stenciller) TmplStencil(id string, data map[string]string) (string, err
 	return interpolated, nil
 }
 
-// TableStencil takes the ID of a Table Stencil and a slice of "row" maps with
+// UseTableStencil takes the ID of a Table Stencil and a slice of "row" maps with
 // string key/values. It returns an error if it can't find a Stencil with the
 // passed ID. It applies the Table Stencil to the row map slice to create a 2D
 // slice. If the Headers fields of the Stencil isn't empty, it will will prepend
 // the headers to the 2D slice with a dynamically-sized divider row before
 // returning the result.
-func (s *Stenciller) TableStencil(id string, data []map[string]string) (coloredSlices [][]string, err error) {
+func (s *Stenciller) UseTableStencil(id string, data []map[string]string) (coloredSlices [][]string, err error) {
 	stencil, err := s.findTableStencil(id)
 	if err != nil {
 		return nil, err
@@ -137,8 +140,8 @@ func (s *Stenciller) TableStencil(id string, data []map[string]string) (coloredS
 
 }
 
-func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
-	for _, stencil := range s.tmplStencils {
+func (s *Stenciller) findTemplateStencil(id string) (*TemplateStencil, error) {
+	for _, stencil := range s.templateStencils {
 		if stencil.ID == id {
 			return stencil, nil
 		}
@@ -146,7 +149,7 @@ func (s *Stenciller) findTmplStencil(id string) (*tmplStencil, error) {
 	return nil, fmt.Errorf("Unable to find template stencil with id of %v", id)
 }
 
-func (s *Stenciller) findTableStencil(id string) (*tableStencil, error) {
+func (s *Stenciller) findTableStencil(id string) (*TableStencil, error) {
 	for _, stencil := range s.tableStencils {
 		if stencil.ID == id {
 			return stencil, nil
@@ -188,7 +191,7 @@ func mapToSliceInColumnOrder(mapRow map[string]string, columnOrder []string) []s
 	return sliceRow
 }
 
-func createHeaderSlices(stencil *tableStencil, dataMaps []map[string]string) (_ [][]string, ok bool) {
+func createHeaderSlices(stencil *TableStencil, dataMaps []map[string]string) (_ [][]string, ok bool) {
 	if len(stencil.Headers) == 0 {
 		return nil, false
 	}
