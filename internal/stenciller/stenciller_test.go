@@ -421,43 +421,6 @@ func (suite *StencillerSuite) TestColorDataWithNonExistantColor() {
 	suite.Equal(expected, actual)
 }
 
-func (suite *StencillerSuite) TestInterpolate() {
-	data := map[string]string{
-		"Field1": "value1",
-		"field2": "value2",
-	}
-	tmpl := "abc {{ .field2 }} def {{.Field1}}"
-	expected := "abc value2 def value1"
-	actual, err := interpolate(tmpl, data)
-	suite.NoError(err)
-	suite.Equal(expected, actual)
-}
-
-func (suite *StencillerSuite) TestInterpolateWithNonExistantKey() {
-	data := map[string]string{
-		"Field1": "value1",
-		"field2": "value2",
-	}
-	tmpl := "abc {{ .field2 }} def {{.Field3}}"
-	expected := "abc value2 def <no value>"
-	actual, err := interpolate(tmpl, data)
-	suite.NoError(err)
-	suite.Equal(expected, actual)
-}
-
-func (suite *StencillerSuite) TestInterpolateWithExtraMapKey() {
-	data := map[string]string{
-		"Field1": "value1",
-		"field2": "value2",
-		"Field3": "value3",
-	}
-	tmpl := "abc {{ .field2 }} def {{.Field1}}"
-	expected := "abc value2 def value1"
-	actual, err := interpolate(tmpl, data)
-	suite.NoError(err)
-	suite.Equal(expected, actual)
-}
-
 func TestStencillerSuite(t *testing.T) {
 	suite.Run(t, new(StencillerSuite))
 }

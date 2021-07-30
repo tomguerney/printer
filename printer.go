@@ -302,12 +302,12 @@ func (p *Printer) Select(label string, table []string) (i int, err error) {
 }
 
 // TemplateSelect selects with a table
-func TemplateSelect(label, id string, rows []map[string]string) (i int, err error) {
-	return singleton.TemplateSelect(label, id, rows)
+func TemplateSelect(id, label string, rows []map[string]string) (i int, err error) {
+	return singleton.TemplateSelect(id, label, rows)
 }
 
 // TemplateSelect selects
-func (p *Printer) TemplateSelect(label, id string, rows []map[string]string) (i int, err error) {
+func (p *Printer) TemplateSelect(id, label string, rows []map[string]string) (i int, err error) {
 	results := []string{}
 	for _, data := range rows {
 		result, err := p.stenciller.UseTemplateStencil(id, data)

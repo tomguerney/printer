@@ -3,10 +3,10 @@ package stenciller
 import (
 	"fmt"
 	"strings"
-	"text/template"
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/tomguerney/interpolator"
 	c "github.com/tomguerney/printer/internal/colorer"
 )
 
@@ -103,7 +103,7 @@ func (s *Stenciller) UseTemplateStencil(id string, data map[string]string) (stri
 		return "", err
 	}
 	coloredData := s.colorMap(stencil.Colors, data)
-	interpolated, err := interpolate(stencil.Template, coloredData)
+	interpolated, err := interpolator.Interpolate(stencil.Template, coloredData)
 	if err != nil {
 		return "", err
 	}
@@ -198,18 +198,6 @@ func createHeaderSlices(stencil *TableStencil, dataMaps []map[string]string) (_ 
 	return [][]string{stencil.Headers, divRow}, true
 }
 
-func interpolate(tmpl string, data map[string]string) (string, error) {
-	builder := strings.Builder{}
-	parsed, err := template.New("stencil").Parse(tmpl)
-	if err != nil {
-		return "", err
-	}
-	err = parsed.Execute(&builder, data)
-	if err != nil {
-		return "", err
-	}
-	return builder.String(), nil
-}
 
 func createDivRow(colWidths map[int]int) []string {
 	divRow := make([]string, len(colWidths))
